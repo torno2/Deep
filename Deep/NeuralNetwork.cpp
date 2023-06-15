@@ -1,4 +1,4 @@
-#include "pch.h"
+ #include "pch.h"
 #include "NeuralNetwork.h"
 
 
@@ -471,6 +471,7 @@ namespace TNNT
 			{
 				m_Weights[currentOffset + index] = m_WeightsOld[currentOffset + index];
 				m_WeightsTranspose[currentOffset + (index / m_LayerLayout[layoutIndex - 1]) + (index % m_LayerLayout[layoutIndex - 1]) * m_LayerLayout[layoutIndex]] = m_WeightsOld[currentOffset + index];
+				
 				index++;
 			}
 

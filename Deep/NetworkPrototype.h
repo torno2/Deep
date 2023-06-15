@@ -26,7 +26,6 @@ namespace TNNT {
 		float* m_Biases;
 		float* m_DeltaBiases;
 		float* m_BiasesBuffer;
-		float* m_BiasesOld;
 		unsigned m_BiasesCount;
 
 
@@ -34,7 +33,6 @@ namespace TNNT {
 		float* m_WeightsTranspose;
 		float* m_DeltaWeights;
 		float* m_WeightsBuffer;
-		float* m_WeightsOld;
 		unsigned m_WeightsCount;
 
 		float* m_TargetBuffer;

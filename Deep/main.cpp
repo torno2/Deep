@@ -10,7 +10,7 @@
 int main() {
 
 
-#if 2 > 3
+#if 2 < 3
 	{
 		using namespace TNNT;
 
@@ -65,7 +65,7 @@ int main() {
 		unsigned int* layout = new unsigned int[layoutCount];
 		{
 			layout[0] = 784;
-			layout[1] = 30;
+			layout[1] = 10;
 			layout[2] = 10;
 		}
 
@@ -87,39 +87,35 @@ int main() {
 		}
 
 
-		NeuralNetwork n(layout,layoutCount,funcLayout);
+		NeuralNetwork n(layout,layoutCount,funcLayout, true);
 
 		//Network setup stop
 
 
 
 
-
+		
 
 		//Prototype Network setup start
 
-		unsigned int playoutCount = 4;
+		unsigned int playoutCount = 3;
 		LayerLayout* pLayout = new LayerLayout[playoutCount];
 		{
 			pLayout[0].Nodes = 28 * 28;
 			pLayout[0].Biases = 0;
 			pLayout[0].Weights = 0;
-			pLayout[0].WeightsRowSize = 0;
+			pLayout[0].WeightsRowCount = 0;
 
-			pLayout[1].Nodes = 24*24*3;
-			pLayout[1].Biases = 1 * 3;
-			pLayout[1].Weights = 5*5*3;
-			pLayout[1].WeightsRowSize = 5;
+			pLayout[1].Nodes = 100;
+			pLayout[1].Biases = pLayout[1].Nodes;
+			pLayout[1].Weights = pLayout[1].Nodes* pLayout[0].Nodes;
+			pLayout[1].WeightsRowCount = pLayout[0].Nodes;
 
-			pLayout[2].Nodes = 12*12*3;
-			pLayout[2].Biases = 0;
-			pLayout[2].Weights = 0;
-			pLayout[2].WeightsRowSize = 0;
+			pLayout[2].Nodes = 10;
+			pLayout[2].Biases = pLayout[2].Nodes;
+			pLayout[2].Weights = pLayout[2].Nodes* pLayout[1].Nodes;
+			pLayout[2].WeightsRowCount = pLayout[1].Nodes;
 
-			pLayout[3].Nodes = 10;
-			pLayout[3].Biases = pLayout[3].Nodes;
-			pLayout[3].Weights = pLayout[3].Nodes * pLayout[2].Nodes;
-			pLayout[3].WeightsRowSize = pLayout[2].Nodes;
 
 		}
 
@@ -129,36 +125,34 @@ int main() {
 			pFuncLayout.NeuronFunctions = new FunctionsLayout::NeuronFunction[playoutCount -1];
 			{
 				pFuncLayout.NeuronFunctions[0].f = Math::Sigmoid;
-				pFuncLayout.NeuronFunctions[1].f = Math::Identity;
-				pFuncLayout.NeuronFunctions[2].f = Math::Sigmoid;
+				pFuncLayout.NeuronFunctions[1].f = Math::Sigmoid;
 			;
 			}
 			pFuncLayout.NeuronFunctionsDerivatives = new FunctionsLayout::NeuronFunction[playoutCount - 1];
 			{
 				pFuncLayout.NeuronFunctionsDerivatives[0].f = Math::SigmoidDerivative;
-				pFuncLayout.NeuronFunctionsDerivatives[1].f = Math::IdentityDerivative;
-				pFuncLayout.NeuronFunctionsDerivatives[2].f = Math::SigmoidDerivative;
+				pFuncLayout.NeuronFunctionsDerivatives[1].f = Math::SigmoidDerivative;
+				
 			}
 
 			pFuncLayout.FeedForwardCallBackFunctions = new FunctionsLayout::NetworkRelayFunction[playoutCount - 1];
 			{
-				pFuncLayout.FeedForwardCallBackFunctions[0].f = LayerFunctions::ConvolutionLayerFeedForward;
-				pFuncLayout.FeedForwardCallBackFunctions[1].f = LayerFunctions::PoolingLayerFeedForward;
-				pFuncLayout.FeedForwardCallBackFunctions[2].f = LayerFunctions::FullyConnectedFeedForward;
+				pFuncLayout.FeedForwardCallBackFunctions[0].f = LayerFunctions::FullyConnectedFeedForward;
+				pFuncLayout.FeedForwardCallBackFunctions[1].f = LayerFunctions::FullyConnectedFeedForward;
+				
 			}
 
 			pFuncLayout.BackPropegateCallBackFunctionsZ = new FunctionsLayout::NetworkRelayFunction[playoutCount - 2];
 			{
-				pFuncLayout.BackPropegateCallBackFunctionsZ[0].f = LayerFunctions::PoolingLayerBackpropegateZ;
-				pFuncLayout.BackPropegateCallBackFunctionsZ[1].f = LayerFunctions::FullyConnectedBackpropegateZ;
+				pFuncLayout.BackPropegateCallBackFunctionsZ[0].f = LayerFunctions::FullyConnectedBackpropegateZ;
+				
 				
 			}
 
 			pFuncLayout.BackPropegateCallBackFunctionsBW = new FunctionsLayout::NetworkRelayFunction[playoutCount - 1];
 			{
-				pFuncLayout.BackPropegateCallBackFunctionsBW[0].f = LayerFunctions::ConvolutionLayerBackpropegateBW;
-				pFuncLayout.BackPropegateCallBackFunctionsBW[1].f = LayerFunctions::PoolingLayerBackpropegateBW;
-				pFuncLayout.BackPropegateCallBackFunctionsBW[2].f = LayerFunctions::FullyConnectedBackpropegateBW;
+				pFuncLayout.BackPropegateCallBackFunctionsBW[0].f = LayerFunctions::FullyConnectedBackpropegateBW;
+				pFuncLayout.BackPropegateCallBackFunctionsBW[1].f = LayerFunctions::FullyConnectedBackpropegateBW;
 			}
 
 
@@ -171,7 +165,7 @@ int main() {
 			pFuncLayout.TrainingFunction.f = TrainingFunctions::GradientDecent;
 		}
 
-		NetworkPrototype pN(pLayout, pFuncLayout , playoutCount);
+		NetworkPrototype pN(pLayout, pFuncLayout , playoutCount, true);
 
 		//Prototype Network setup stop
 
@@ -194,11 +188,11 @@ int main() {
 		pr("Network setup time:" << time.count() << "s");
 		//Network setup end
 
-
-
+		
+		pr("New");
 		pr("Prototype: ");
 		{
-
+			
 			//Training start
 			start = std::chrono::high_resolution_clock::now();
 
@@ -254,22 +248,7 @@ int main() {
 
 #endif
 
-	float* k1 = new float[4];
-	k1[0] = 1; k1[1] = 0; 
-	k1[2] = 0; k1[3] = 1;
 
-
-	float* k2 = new float[4];
-	k2[0] = 1; k2[1] = 1;
-	k2[2] = 1; k2[3] = 2;
-	
-	Math::Matrix<float> a(k1,2,2);
-	Math::Matrix<float> b(k2,2,2);
-
-	Math::Matrix<float> c = b;
-	c *= b;
-
-	pr(c);
 
 	std::cin.get();
 }

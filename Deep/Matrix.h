@@ -39,13 +39,16 @@ namespace Math{
 		}
 
 
+		unsigned GetCount() const
+		{
+			return RowCount * ColCount;
+		}
 
 
 		T& operator[](const unsigned i)
 		{
 			return Arr[i];
 		}
-
 
 		
 		const Matrix<T>& operator=(const Matrix<T>& other) const
@@ -163,6 +166,15 @@ namespace Math{
 			ColCount = temp;
 		}
 
+		//This will guarantee that a vector is a column vector. Of course it is meant to be used on a vector.
+		void MakeCol()
+		{
+			if (RowCount > ColCount)
+			{
+				Flip();
+			}
+		}
+
 
 		//You can also strip rows and columns from the right and bottom using this.
 		void Pad(unsigned rowCount , unsigned colCount)
@@ -195,7 +207,8 @@ namespace Math{
 			ColCount = colCount;
 		}
 
-
+		
+		
 
 
 	public:

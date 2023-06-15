@@ -26,7 +26,8 @@ namespace TNNT
 
 				n->m_ZBuffer[layerIndex+n->m_PositionData.Z] = weightedSum + n->m_Biases[layerIndex+ n->m_PositionData.Biases];
 
-				n->m_ABuffer[layerIndex+ n->m_PositionData.A] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer-1].f(n->m_ZBuffer[layerIndex + n->m_PositionData.Z]);
+
+				n->m_ABuffer[layerIndex + n->m_PositionData.A] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(n->m_ZBuffer[layerIndex + n->m_PositionData.Z]);
 
 				layerIndex++;
 			}
@@ -53,8 +54,8 @@ namespace TNNT
 					latterLayerIndex++;
 				}
 
-				float z = n->m_ZBuffer[n->m_PositionData.Z + layerIndex];
-				n->m_DeltaZ[n->m_PositionData.Z + layerIndex] = errorSum * n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer - 1].f(z);
+				float dz = n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer - 1].f(n->m_ZBuffer[n->m_PositionData.Z + layerIndex]);
+				n->m_DeltaZ[n->m_PositionData.Z + layerIndex] = errorSum * dz;
 
 				layerIndex++;
 			}
@@ -72,6 +73,7 @@ namespace TNNT
 
 				const float dz = n->m_DeltaZ[n->m_PositionData.Z + layerIndex];
 				n->m_DeltaBiases[n->m_PositionData.Biases + layerIndex] = dz;
+
 
 
 				unsigned prevLayerIndex = 0;

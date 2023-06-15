@@ -52,16 +52,13 @@ namespace TNNT
 		m_Biases = new float[m_BiasesCount];
 		m_DeltaBiases = new float[m_BiasesCount];
 		m_BiasesBuffer = new float[m_BiasesCount];
-		m_BiasesOld = new float[m_BiasesCount];
 
-
-		
 
 		m_Weights = new float[weightTotal];
 		m_WeightsTranspose = new float[weightTotal];
 		m_DeltaWeights = new float[weightTotal];
 		m_WeightsBuffer = new float[weightTotal];
-		m_WeightsOld = new float[weightTotal];
+		
 
 		m_TargetBuffer = new float[m_LayerLayout[m_LayerLayoutCount - 1].Nodes];
 
@@ -121,13 +118,11 @@ namespace TNNT
 		delete[] m_Biases;
 		delete[] m_DeltaBiases;
 		delete[] m_BiasesBuffer;
-		delete[] m_BiasesOld;
 
 		delete[] m_Weights;
 		delete[] m_WeightsTranspose;
 		delete[] m_DeltaWeights;
 		delete[] m_WeightsBuffer;
-		delete[] m_WeightsOld;
 
 		delete[] m_TargetBuffer;
 
@@ -186,29 +181,26 @@ namespace TNNT
 	}
 
 
-	void NetworkPrototype::SetWeightsToTemp()
-	{
-
-		unsigned currentOffset = 0;
-		unsigned currentCount = 0;
-		unsigned layoutIndex = 1;
-		while (layoutIndex < m_LayerLayoutCount)
-		{
-			unsigned rowSize = m_LayerLayout[layoutIndex].WeightsRowSize;
-			unsigned columnSize = m_LayerLayout[layoutIndex].Weights / rowSize;
-			currentOffset += currentCount;
-			currentCount = m_LayerLayout[layoutIndex].Weights;
-			unsigned index = 0;
-			while (index < currentCount)
-			{
-				m_Weights[currentOffset + index] = m_WeightsBuffer[currentOffset + index];
-				m_WeightsTranspose[currentOffset + (index / rowSize) + (index % rowSize) * columnSize] = m_WeightsBuffer[currentOffset + index];
-				index++;
-			}
-
-			layoutIndex++;
-		}
-
+void NetworkPrototype::SetWeightsToTemp()	
+	{	
+		unsigned currentOffset = 0;	
+		unsigned currentCount = 0;	
+		unsigned layoutIndex = 1;	
+		while (layoutIndex < m_LayerLayoutCount)	
+		{	
+			unsigned rowSize = m_LayerLayout[layoutIndex].WeightsRowCount;	
+			unsigned columnSize = m_LayerLayout[layoutIndex].Weights / rowSize;	
+			currentOffset += currentCount;	
+			currentCount = m_LayerLayout[layoutIndex].Weights;	
+			unsigned index = 0;	
+			while (index < currentCount)	
+			{	
+				m_Weights[currentOffset + index] = m_WeightsBuffer[currentOffset + index];	
+				m_WeightsTranspose[currentOffset + (index / rowSize) + (index % rowSize) * columnSize] = m_WeightsBuffer[currentOffset + index];	
+				index++;	
+			}	
+			layoutIndex++;	
+		}	
 	}
 
 	void NetworkPrototype::SetTempToWeights()
@@ -228,8 +220,8 @@ namespace TNNT
 		unsigned layoutIndex = 1;
 		while (layoutIndex < m_LayerLayoutCount)
 		{
-			unsigned rowSize = m_LayerLayout[layoutIndex].WeightsRowSize;
-			unsigned columnSize = m_LayerLayout[layoutIndex].Weights / m_LayerLayout[layoutIndex].WeightsRowSize;
+			unsigned rowSize = m_LayerLayout[layoutIndex].WeightsRowCount;
+			unsigned columnSize = m_LayerLayout[layoutIndex].Weights / rowSize;
 
 			currentOffset += currentCount;
 			currentCount = m_LayerLayout[layoutIndex].Weights;
