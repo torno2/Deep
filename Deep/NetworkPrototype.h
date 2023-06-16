@@ -30,7 +30,6 @@ namespace TNNT {
 
 
 		float* m_Weights;
-		float* m_WeightsTranspose;
 		float* m_DeltaWeights;
 		float* m_WeightsBuffer;
 		unsigned m_WeightsCount;
@@ -66,18 +65,21 @@ namespace TNNT {
 	public:
 
 
+		//Network helpers:
+
 		void SetBiasesToTemp();
 		void SetTempToBiases();
 
 		void SetWeightsToTemp();
 		void SetTempToWeights();
-		void ResetWeightsTranspose();
 
 		void SetData(DataSet* data);
 		void SetHyperParameters(HyperParameters& params);
 
 		void SetInput(const float* input);
 		void SetTarget(const float* target);
+
+		//Actual network mechanisms
 
 		void FeedForward();
 		void Backpropegate();
@@ -86,6 +88,8 @@ namespace TNNT {
 
 		void TrainMasterFunction();
 		
+		// Performance evaluation
+
 		float CheckCostMasterFunction();
 		float CheckSuccessRateMasterFunction();
 

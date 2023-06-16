@@ -25,8 +25,6 @@ namespace TNNT
 				}
 
 				n->m_ZBuffer[layerIndex+n->m_PositionData.Z] = weightedSum + n->m_Biases[layerIndex+ n->m_PositionData.Biases];
-
-
 				n->m_ABuffer[layerIndex + n->m_PositionData.A] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(n->m_ZBuffer[layerIndex + n->m_PositionData.Z]);
 
 				layerIndex++;
@@ -50,7 +48,7 @@ namespace TNNT
 				unsigned latterLayerIndex = 0;
 				while (latterLayerIndex < n->m_LayerLayout[n->m_PositionData.Layer+1].Nodes)
 				{
-					errorSum += n->m_WeightsTranspose[latterWeights + n->m_LayerLayout[n->m_PositionData.Layer + 1].Nodes * layerIndex + latterLayerIndex] * n->m_DeltaZ[latterZPos + latterLayerIndex];
+					errorSum += n->m_Weights[latterWeights + n->m_LayerLayout[n->m_PositionData.Layer ].Nodes * latterLayerIndex + layerIndex ] * n->m_DeltaZ[latterZPos + latterLayerIndex];
 					latterLayerIndex++;
 				}
 

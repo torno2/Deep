@@ -65,7 +65,7 @@ int main() {
 		unsigned int* layout = new unsigned int[layoutCount];
 		{
 			layout[0] = 784;
-			layout[1] = 10;
+			layout[1] = 300;
 			layout[2] = 10;
 		}
 
@@ -106,7 +106,7 @@ int main() {
 			pLayout[0].Weights = 0;
 			pLayout[0].WeightsRowCount = 0;
 
-			pLayout[1].Nodes = 100;
+			pLayout[1].Nodes = 300;
 			pLayout[1].Biases = pLayout[1].Nodes;
 			pLayout[1].Weights = pLayout[1].Nodes* pLayout[0].Nodes;
 			pLayout[1].WeightsRowCount = pLayout[0].Nodes;
