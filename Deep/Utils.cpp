@@ -48,3 +48,15 @@ void PrintWeights(unsigned* layout, unsigned layoutSize, float* weights,unsigned
 		}
 	}
 }
+
+void Timer::Start()
+{
+	start = std::chrono::high_resolution_clock::now();
+}
+
+float Timer::Stop()
+{
+	auto stop = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<float>  time = stop - start;
+	return time.count();
+}

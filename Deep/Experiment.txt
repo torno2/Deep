@@ -1,0 +1,1120 @@
+Experiment: 1
+
+Nodes in hidden layer: 5
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 3.20471 |  Success Rate: 0.1135
+
+Training duration: 3.21208
+
+2 : 0.004
+Results: | Cost: 3.0778 |  Success Rate: 0.2075
+
+Training duration: 3.24139
+
+3 : 0.006
+Results: | Cost: 3.24923 |  Success Rate: 0.1135
+
+Training duration: 3.20551
+
+4 : 0.008
+Results: | Cost: 3.0111 |  Success Rate: 0.2021
+
+Training duration: 3.19085
+
+5 : 0.01
+Results: | Cost: 3.02771 |  Success Rate: 0.2077
+
+Training duration: 3.19712
+
+6 : 0.012
+Results: | Cost: 3.01429 |  Success Rate: 0.2097
+
+Training duration: 3.16591
+
+7 : 0.014
+Results: | Cost: 3.25015 |  Success Rate: 0.1135
+
+Training duration: 3.16002
+
+8 : 0.016
+Results: | Cost: 2.91679 |  Success Rate: 0.2111
+
+Training duration: 3.17184
+
+9 : 0.018
+Results: | Cost: 2.70286 |  Success Rate: 0.2932
+
+Training duration: 3.16859
+
+10 : 0.02
+Results: | Cost: 2.96435 |  Success Rate: 0.2029
+
+Training duration: 3.16764
+
+Experiment: 2
+
+Nodes in hidden layer: 10
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 3.10216 |  Success Rate: 0.2778
+
+Training duration: 5.98278
+
+2 : 0.004
+Results: | Cost: 3.01384 |  Success Rate: 0.3551
+
+Training duration: 5.98612
+
+3 : 0.006
+Results: | Cost: 2.92837 |  Success Rate: 0.2884
+
+Training duration: 5.93162
+
+4 : 0.008
+Results: | Cost: 2.80928 |  Success Rate: 0.3017
+
+Training duration: 5.98976
+
+5 : 0.01
+Results: | Cost: 2.97188 |  Success Rate: 0.2008
+
+Training duration: 5.95924
+
+6 : 0.012
+Results: | Cost: 3.03622 |  Success Rate: 0.2293
+
+Training duration: 5.97082
+
+7 : 0.014
+Results: | Cost: 2.57026 |  Success Rate: 0.4349
+
+Training duration: 6.01624
+
+8 : 0.016
+Results: | Cost: 2.48441 |  Success Rate: 0.4597
+
+Training duration: 5.97294
+
+9 : 0.018
+Results: | Cost: 2.52874 |  Success Rate: 0.4533
+
+Training duration: 6.02405
+
+10 : 0.02
+Results: | Cost: 2.64821 |  Success Rate: 0.365
+
+Training duration: 6.03053
+
+Experiment: 3
+
+Nodes in hidden layer: 15
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 2.91087 |  Success Rate: 0.3784
+
+Training duration: 8.77054
+
+2 : 0.004
+Results: | Cost: 2.68943 |  Success Rate: 0.4814
+
+Training duration: 8.79846
+
+3 : 0.006
+Results: | Cost: 2.57627 |  Success Rate: 0.4983
+
+Training duration: 8.82226
+
+4 : 0.008
+Results: | Cost: 2.28319 |  Success Rate: 0.5156
+
+Training duration: 8.83025
+
+5 : 0.01
+Results: | Cost: 2.26161 |  Success Rate: 0.5706
+
+Training duration: 8.75264
+
+6 : 0.012
+Results: | Cost: 2.33832 |  Success Rate: 0.5216
+
+Training duration: 8.84657
+
+7 : 0.014
+Results: | Cost: 2.15176 |  Success Rate: 0.557
+
+Training duration: 8.78418
+
+8 : 0.016
+Results: | Cost: 2.13757 |  Success Rate: 0.5678
+
+Training duration: 8.81318
+
+9 : 0.018
+Results: | Cost: 2.28339 |  Success Rate: 0.4968
+
+Training duration: 8.85052
+
+10 : 0.02
+Results: | Cost: 2.32595 |  Success Rate: 0.5192
+
+Training duration: 8.87791
+
+Experiment: 4
+
+Nodes in hidden layer: 20
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 2.73894 |  Success Rate: 0.4655
+
+Training duration: 11.6476
+
+2 : 0.004
+Results: | Cost: 2.28064 |  Success Rate: 0.6426
+
+Training duration: 11.6783
+
+3 : 0.006
+Results: | Cost: 2.13925 |  Success Rate: 0.6306
+
+Training duration: 11.68
+
+4 : 0.008
+Results: | Cost: 1.82075 |  Success Rate: 0.7247
+
+Training duration: 12.0013
+
+5 : 0.01
+Results: | Cost: 1.92098 |  Success Rate: 0.6745
+
+Training duration: 11.993
+
+6 : 0.012
+Results: | Cost: 1.80484 |  Success Rate: 0.6875
+
+Training duration: 11.8479
+
+7 : 0.014
+Results: | Cost: 1.85724 |  Success Rate: 0.6811
+
+Training duration: 11.7757
+
+8 : 0.016
+Results: | Cost: 1.94641 |  Success Rate: 0.6056
+
+Training duration: 11.7925
+
+9 : 0.018
+Results: | Cost: 2.17889 |  Success Rate: 0.5603
+
+Training duration: 11.7451
+
+10 : 0.02
+Results: | Cost: 1.91158 |  Success Rate: 0.636
+
+Training duration: 11.8327
+
+Experiment: 5
+
+Nodes in hidden layer: 25
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 2.44888 |  Success Rate: 0.6305
+
+Training duration: 14.5702
+
+2 : 0.004
+Results: | Cost: 2.03304 |  Success Rate: 0.7018
+
+Training duration: 14.5644
+
+3 : 0.006
+Results: | Cost: 1.89169 |  Success Rate: 0.725
+
+Training duration: 14.6367
+
+4 : 0.008
+Results: | Cost: 1.7163 |  Success Rate: 0.7302
+
+Training duration: 14.7935
+
+5 : 0.01
+Results: | Cost: 1.72643 |  Success Rate: 0.7274
+
+Training duration: 14.6607
+
+6 : 0.012
+Results: | Cost: 1.5485 |  Success Rate: 0.755
+
+Training duration: 14.6876
+
+7 : 0.014
+Results: | Cost: 1.70632 |  Success Rate: 0.7209
+
+Training duration: 14.6243
+
+8 : 0.016
+Results: | Cost: 1.5811 |  Success Rate: 0.7207
+
+Training duration: 14.5603
+
+9 : 0.018
+Results: | Cost: 1.86348 |  Success Rate: 0.6285
+
+Training duration: 14.6054
+
+10 : 0.02
+Results: | Cost: 1.81543 |  Success Rate: 0.639
+
+Training duration: 14.6384
+
+Experiment: 6
+
+Nodes in hidden layer: 30
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 2.33985 |  Success Rate: 0.7314
+
+Training duration: 17.3221
+
+2 : 0.004
+Results: | Cost: 1.7389 |  Success Rate: 0.8145
+
+Training duration: 17.3807
+
+3 : 0.006
+Results: | Cost: 1.52522 |  Success Rate: 0.803
+
+Training duration: 17.369
+
+4 : 0.008
+Results: | Cost: 1.49361 |  Success Rate: 0.7796
+
+Training duration: 17.4186
+
+5 : 0.01
+Results: | Cost: 1.42997 |  Success Rate: 0.7979
+
+Training duration: 17.3774
+
+6 : 0.012
+Results: | Cost: 1.56189 |  Success Rate: 0.789
+
+Training duration: 17.4325
+
+7 : 0.014
+Results: | Cost: 1.62553 |  Success Rate: 0.7547
+
+Training duration: 17.4572
+
+8 : 0.016
+Results: | Cost: 1.75595 |  Success Rate: 0.6944
+
+Training duration: 17.3902
+
+9 : 0.018
+Results: | Cost: 1.58542 |  Success Rate: 0.7161
+
+Training duration: 17.4386
+
+10 : 0.02
+Results: | Cost: 1.67818 |  Success Rate: 0.6792
+
+Training duration: 17.396
+
+Experiment: 7
+
+Nodes in hidden layer: 35
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 2.03922 |  Success Rate: 0.7637
+
+Training duration: 20.104
+
+2 : 0.004
+Results: | Cost: 1.56481 |  Success Rate: 0.8225
+
+Training duration: 20.1262
+
+3 : 0.006
+Results: | Cost: 1.42587 |  Success Rate: 0.812
+
+Training duration: 20.0942
+
+4 : 0.008
+Results: | Cost: 1.36935 |  Success Rate: 0.8234
+
+Training duration: 20.2337
+
+5 : 0.01
+Results: | Cost: 1.39816 |  Success Rate: 0.7707
+
+Training duration: 20.26
+
+6 : 0.012
+Results: | Cost: 1.32666 |  Success Rate: 0.8026
+
+Training duration: 20.1861
+
+7 : 0.014
+Results: | Cost: 1.48636 |  Success Rate: 0.731
+
+Training duration: 20.2435
+
+8 : 0.016
+Results: | Cost: 1.54818 |  Success Rate: 0.71
+
+Training duration: 20.2643
+
+9 : 0.018
+Results: | Cost: 1.62747 |  Success Rate: 0.7013
+
+Training duration: 20.3243
+
+10 : 0.02
+Results: | Cost: 1.42926 |  Success Rate: 0.7784
+
+Training duration: 20.2853
+
+Experiment: 8
+
+Nodes in hidden layer: 40
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.99092 |  Success Rate: 0.7808
+
+Training duration: 22.9213
+
+2 : 0.004
+Results: | Cost: 1.47533 |  Success Rate: 0.83
+
+Training duration: 22.9651
+
+3 : 0.006
+Results: | Cost: 1.29954 |  Success Rate: 0.8459
+
+Training duration: 22.9708
+
+4 : 0.008
+Results: | Cost: 1.33271 |  Success Rate: 0.8185
+
+Training duration: 23.0332
+
+5 : 0.01
+Results: | Cost: 1.43406 |  Success Rate: 0.7707
+
+Training duration: 23.1096
+
+6 : 0.012
+Results: | Cost: 1.26048 |  Success Rate: 0.8181
+
+Training duration: 23.1164
+
+7 : 0.014
+Results: | Cost: 1.41652 |  Success Rate: 0.785
+
+Training duration: 23.059
+
+8 : 0.016
+Results: | Cost: 1.42181 |  Success Rate: 0.7666
+
+Training duration: 23.0813
+
+9 : 0.018
+Results: | Cost: 1.45855 |  Success Rate: 0.7379
+
+Training duration: 23.1537
+
+10 : 0.02
+Results: | Cost: 1.39497 |  Success Rate: 0.7693
+
+Training duration: 23.182
+
+Experiment: 9
+
+Nodes in hidden layer: 45
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.82309 |  Success Rate: 0.8198
+
+Training duration: 25.7203
+
+2 : 0.004
+Results: | Cost: 1.35796 |  Success Rate: 0.8525
+
+Training duration: 25.8188
+
+3 : 0.006
+Results: | Cost: 1.3084 |  Success Rate: 0.8363
+
+Training duration: 25.7867
+
+4 : 0.008
+Results: | Cost: 1.24562 |  Success Rate: 0.8226
+
+Training duration: 25.8312
+
+5 : 0.01
+Results: | Cost: 1.21977 |  Success Rate: 0.8254
+
+Training duration: 25.9489
+
+6 : 0.012
+Results: | Cost: 1.36834 |  Success Rate: 0.7825
+
+Training duration: 25.9041
+
+7 : 0.014
+Results: | Cost: 1.24273 |  Success Rate: 0.8086
+
+Training duration: 26.0538
+
+8 : 0.016
+Results: | Cost: 1.4436 |  Success Rate: 0.7768
+
+Training duration: 25.9579
+
+9 : 0.018
+Results: | Cost: 1.38362 |  Success Rate: 0.7562
+
+Training duration: 26.0156
+
+10 : 0.02
+Results: | Cost: 1.42403 |  Success Rate: 0.7496
+
+Training duration: 25.9851
+
+Experiment: 10
+
+Nodes in hidden layer: 50
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.70056 |  Success Rate: 0.8165
+
+Training duration: 28.4854
+
+2 : 0.004
+Results: | Cost: 1.30079 |  Success Rate: 0.8591
+
+Training duration: 28.5915
+
+3 : 0.006
+Results: | Cost: 1.20305 |  Success Rate: 0.8623
+
+Training duration: 28.7699
+
+4 : 0.008
+Results: | Cost: 1.19372 |  Success Rate: 0.85
+
+Training duration: 28.7672
+
+5 : 0.01
+Results: | Cost: 1.19829 |  Success Rate: 0.8407
+
+Training duration: 28.8336
+
+6 : 0.012
+Results: | Cost: 1.29174 |  Success Rate: 0.8189
+
+Training duration: 28.7907
+
+7 : 0.014
+Results: | Cost: 1.24397 |  Success Rate: 0.8172
+
+Training duration: 28.7996
+
+8 : 0.016
+Results: | Cost: 1.23969 |  Success Rate: 0.8044
+
+Training duration: 28.8135
+
+9 : 0.018
+Results: | Cost: 1.41302 |  Success Rate: 0.7833
+
+Training duration: 28.8665
+
+10 : 0.02
+Results: | Cost: 1.3867 |  Success Rate: 0.7797
+
+Training duration: 28.8427
+
+Experiment: 11
+
+Nodes in hidden layer: 55
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.61168 |  Success Rate: 0.844
+
+Training duration: 31.3849
+
+2 : 0.004
+Results: | Cost: 1.21635 |  Success Rate: 0.8692
+
+Training duration: 31.4468
+
+3 : 0.006
+Results: | Cost: 1.14453 |  Success Rate: 0.8645
+
+Training duration: 31.553
+
+4 : 0.008
+Results: | Cost: 1.18544 |  Success Rate: 0.8491
+
+Training duration: 31.5659
+
+5 : 0.01
+Results: | Cost: 1.1846 |  Success Rate: 0.8348
+
+Training duration: 31.6482
+
+6 : 0.012
+Results: | Cost: 1.21758 |  Success Rate: 0.8272
+
+Training duration: 31.6523
+
+7 : 0.014
+Results: | Cost: 1.33065 |  Success Rate: 0.7862
+
+Training duration: 31.756
+
+8 : 0.016
+Results: | Cost: 1.35518 |  Success Rate: 0.7727
+
+Training duration: 31.6859
+
+9 : 0.018
+Results: | Cost: 1.45052 |  Success Rate: 0.7689
+
+Training duration: 31.5812
+
+10 : 0.02
+Results: | Cost: 1.29982 |  Success Rate: 0.7896
+
+Training duration: 31.7429
+
+Experiment: 12
+
+Nodes in hidden layer: 60
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.46793 |  Success Rate: 0.8526
+
+Training duration: 34.2184
+
+2 : 0.004
+Results: | Cost: 1.1372 |  Success Rate: 0.8738
+
+Training duration: 34.2844
+
+3 : 0.006
+Results: | Cost: 1.05346 |  Success Rate: 0.8793
+
+Training duration: 34.3631
+
+4 : 0.008
+Results: | Cost: 1.12586 |  Success Rate: 0.8598
+
+Training duration: 34.4332
+
+5 : 0.01
+Results: | Cost: 1.10732 |  Success Rate: 0.8533
+
+Training duration: 34.5423
+
+6 : 0.012
+Results: | Cost: 1.19586 |  Success Rate: 0.838
+
+Training duration: 34.4979
+
+7 : 0.014
+Results: | Cost: 1.26187 |  Success Rate: 0.8066
+
+Training duration: 34.5328
+
+8 : 0.016
+Results: | Cost: 1.25658 |  Success Rate: 0.802
+
+Training duration: 34.6315
+
+9 : 0.018
+Results: | Cost: 1.27958 |  Success Rate: 0.7871
+
+Training duration: 34.6012
+
+10 : 0.02
+Results: | Cost: 1.35182 |  Success Rate: 0.7801
+
+Training duration: 34.6229
+
+Experiment: 13
+
+Nodes in hidden layer: 65
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.54037 |  Success Rate: 0.8472
+
+Training duration: 37.0452
+
+2 : 0.004
+Results: | Cost: 1.11248 |  Success Rate: 0.8765
+
+Training duration: 37.1688
+
+3 : 0.006
+Results: | Cost: 1.07304 |  Success Rate: 0.8724
+
+Training duration: 37.3445
+
+4 : 0.008
+Results: | Cost: 1.07564 |  Success Rate: 0.8667
+
+Training duration: 37.3755
+
+5 : 0.01
+Results: | Cost: 1.19309 |  Success Rate: 0.8399
+
+Training duration: 37.337
+
+6 : 0.012
+Results: | Cost: 1.09564 |  Success Rate: 0.8462
+
+Training duration: 37.3414
+
+7 : 0.014
+Results: | Cost: 1.31744 |  Success Rate: 0.8036
+
+Training duration: 37.4057
+
+8 : 0.016
+Results: | Cost: 1.24069 |  Success Rate: 0.8232
+
+Training duration: 37.5257
+
+9 : 0.018
+Results: | Cost: 1.22565 |  Success Rate: 0.8005
+
+Training duration: 37.6266
+
+10 : 0.02
+Results: | Cost: 1.30582 |  Success Rate: 0.7717
+
+Training duration: 37.3935
+
+Experiment: 14
+
+Nodes in hidden layer: 70
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.40956 |  Success Rate: 0.8581
+
+Training duration: 39.8395
+
+2 : 0.004
+Results: | Cost: 1.06001 |  Success Rate: 0.88
+
+Training duration: 40.0001
+
+3 : 0.006
+Results: | Cost: 1.01047 |  Success Rate: 0.8777
+
+Training duration: 40.0227
+
+4 : 0.008
+Results: | Cost: 0.9506 |  Success Rate: 0.8806
+
+Training duration: 40.1674
+
+5 : 0.01
+Results: | Cost: 1.08958 |  Success Rate: 0.8494
+
+Training duration: 40.1286
+
+6 : 0.012
+Results: | Cost: 1.13545 |  Success Rate: 0.8332
+
+Training duration: 40.3314
+
+7 : 0.014
+Results: | Cost: 1.10181 |  Success Rate: 0.8532
+
+Training duration: 40.1637
+
+8 : 0.016
+Results: | Cost: 1.21628 |  Success Rate: 0.8155
+
+Training duration: 40.1973
+
+9 : 0.018
+Results: | Cost: 1.37752 |  Success Rate: 0.7813
+
+Training duration: 40.3344
+
+10 : 0.02
+Results: | Cost: 1.36596 |  Success Rate: 0.7762
+
+Training duration: 40.5345
+
+Experiment: 15
+
+Nodes in hidden layer: 75
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.35207 |  Success Rate: 0.8537
+
+Training duration: 42.6245
+
+2 : 0.004
+Results: | Cost: 1.02708 |  Success Rate: 0.8774
+
+Training duration: 42.8426
+
+3 : 0.006
+Results: | Cost: 0.967113 |  Success Rate: 0.8876
+
+Training duration: 42.9013
+
+4 : 0.008
+Results: | Cost: 1.02043 |  Success Rate: 0.8652
+
+Training duration: 43.0797
+
+5 : 0.01
+Results: | Cost: 1.04004 |  Success Rate: 0.8629
+
+Training duration: 43.0583
+
+6 : 0.012
+Results: | Cost: 1.15682 |  Success Rate: 0.8403
+
+Training duration: 43.0317
+
+7 : 0.014
+Results: | Cost: 1.1717 |  Success Rate: 0.8275
+
+Training duration: 43.0363
+
+8 : 0.016
+Results: | Cost: 1.12201 |  Success Rate: 0.8329
+
+Training duration: 43.2295
+
+9 : 0.018
+Results: | Cost: 1.21138 |  Success Rate: 0.8296
+
+Training duration: 43.2138
+
+10 : 0.02
+Results: | Cost: 1.30191 |  Success Rate: 0.7982
+
+Training duration: 43.1186
+
+Experiment: 16
+
+Nodes in hidden layer: 80
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.34515 |  Success Rate: 0.8623
+
+Training duration: 45.519
+
+2 : 0.004
+Results: | Cost: 0.999319 |  Success Rate: 0.8836
+
+Training duration: 45.6385
+
+3 : 0.006
+Results: | Cost: 0.980374 |  Success Rate: 0.8865
+
+Training duration: 45.7608
+
+4 : 0.008
+Results: | Cost: 0.934894 |  Success Rate: 0.8752
+
+Training duration: 45.8048
+
+5 : 0.01
+Results: | Cost: 0.95831 |  Success Rate: 0.8801
+
+Training duration: 45.8933
+
+6 : 0.012
+Results: | Cost: 1.06045 |  Success Rate: 0.8683
+
+Training duration: 45.955
+
+7 : 0.014
+Results: | Cost: 1.14442 |  Success Rate: 0.8364
+
+Training duration: 46.033
+
+8 : 0.016
+Results: | Cost: 1.16349 |  Success Rate: 0.8434
+
+Training duration: 45.8947
+
+9 : 0.018
+Results: | Cost: 1.21918 |  Success Rate: 0.7974
+
+Training duration: 45.9589
+
+10 : 0.02
+Results: | Cost: 1.3681 |  Success Rate: 0.7874
+
+Training duration: 46.099
+
+Experiment: 17
+
+Nodes in hidden layer: 85
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.3008 |  Success Rate: 0.8694
+
+Training duration: 48.3055
+
+2 : 0.004
+Results: | Cost: 0.983137 |  Success Rate: 0.8861
+
+Training duration: 48.426
+
+3 : 0.006
+Results: | Cost: 0.926884 |  Success Rate: 0.8879
+
+Training duration: 48.5692
+
+4 : 0.008
+Results: | Cost: 0.983319 |  Success Rate: 0.8757
+
+Training duration: 48.5863
+
+5 : 0.01
+Results: | Cost: 0.982 |  Success Rate: 0.8729
+
+Training duration: 48.6869
+
+6 : 0.012
+Results: | Cost: 0.981165 |  Success Rate: 0.8643
+
+Training duration: 48.7705
+
+7 : 0.014
+Results: | Cost: 1.09046 |  Success Rate: 0.8459
+
+Training duration: 48.7647
+
+8 : 0.016
+Results: | Cost: 1.18551 |  Success Rate: 0.819
+
+Training duration: 48.8577
+
+9 : 0.018
+Results: | Cost: 1.19184 |  Success Rate: 0.8309
+
+Training duration: 48.8664
+
+10 : 0.02
+Results: | Cost: 1.25013 |  Success Rate: 0.816
+
+Training duration: 48.9068
+
+Experiment: 18
+
+Nodes in hidden layer: 90
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.23527 |  Success Rate: 0.8744
+
+Training duration: 50.9223
+
+2 : 0.004
+Results: | Cost: 0.971305 |  Success Rate: 0.8874
+
+Training duration: 51.0733
+
+3 : 0.006
+Results: | Cost: 0.959242 |  Success Rate: 0.8831
+
+Training duration: 51.1547
+
+4 : 0.008
+Results: | Cost: 0.927671 |  Success Rate: 0.8802
+
+Training duration: 51.2942
+
+5 : 0.01
+Results: | Cost: 1.02433 |  Success Rate: 0.8693
+
+Training duration: 51.328
+
+6 : 0.012
+Results: | Cost: 1.03123 |  Success Rate: 0.8671
+
+Training duration: 51.3945
+
+7 : 0.014
+Results: | Cost: 1.08415 |  Success Rate: 0.8508
+
+Training duration: 51.4654
+
+8 : 0.016
+Results: | Cost: 1.18064 |  Success Rate: 0.8274
+
+Training duration: 51.7665
+
+9 : 0.018
+Results: | Cost: 1.19844 |  Success Rate: 0.8128
+
+Training duration: 51.7134
+
+10 : 0.02
+Results: | Cost: 1.3141 |  Success Rate: 0.7923
+
+Training duration: 51.6074
+
+Experiment: 19
+
+Nodes in hidden layer: 95
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.17835 |  Success Rate: 0.8793
+
+Training duration: 53.9072
+
+2 : 0.004
+Results: | Cost: 0.924081 |  Success Rate: 0.8925
+
+Training duration: 54.2734
+
+3 : 0.006
+Results: | Cost: 0.90237 |  Success Rate: 0.8847
+
+Training duration: 54.2234
+
+4 : 0.008
+Results: | Cost: 0.966892 |  Success Rate: 0.8768
+
+Training duration: 54.465
+
+5 : 0.01
+Results: | Cost: 0.973768 |  Success Rate: 0.8775
+
+Training duration: 54.2589
+
+6 : 0.012
+Results: | Cost: 0.990528 |  Success Rate: 0.8654
+
+Training duration: 54.4738
+
+7 : 0.014
+Results: | Cost: 1.02615 |  Success Rate: 0.8581
+
+Training duration: 54.4456
+
+8 : 0.016
+Results: | Cost: 1.0896 |  Success Rate: 0.8534
+
+Training duration: 54.4812
+
+9 : 0.018
+Results: | Cost: 1.11274 |  Success Rate: 0.8291
+
+Training duration: 54.607
+
+10 : 0.02
+Results: | Cost: 1.22404 |  Success Rate: 0.8108
+
+Training duration: 54.6156
+
+Experiment: 20
+
+Nodes in hidden layer: 100
+
+Testing network using different learning rates: 
+
+1 : 0.002
+Results: | Cost: 1.19341 |  Success Rate: 0.8801
+
+Training duration: 56.6821
+
+2 : 0.004
+Results: | Cost: 0.915969 |  Success Rate: 0.8952
+
+Training duration: 56.7755
+
+3 : 0.006
+Results: | Cost: 0.889863 |  Success Rate: 0.8915
+
+Training duration: 57.1122
+
+4 : 0.008
+Results: | Cost: 0.901398 |  Success Rate: 0.8863
+
+Training duration: 57.1653
+
+5 : 0.01
+Results: | Cost: 0.968201 |  Success Rate: 0.8745
+
+Training duration: 57.3684
+
+6 : 0.012
+Results: | Cost: 0.976276 |  Success Rate: 0.871
+
+Training duration: 57.2219
+
+7 : 0.014
+Results: | Cost: 1.10694 |  Success Rate: 0.8452
+
+Training duration: 57.3891
+
+8 : 0.016
+Results: | Cost: 1.14881 |  Success Rate: 0.8432
+
+Training duration: 57.3802
+
+9 : 0.018
+Results: | Cost: 1.16058 |  Success Rate: 0.8377
+
+Training duration: 57.5108
+
+10 : 0.02
+Results: | Cost: 1.08309 |  Success Rate: 0.8447
+
+Training duration: 57.5409
+

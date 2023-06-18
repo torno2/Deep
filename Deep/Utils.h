@@ -16,3 +16,14 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
 
 void PrintWeights(unsigned* layout, unsigned layoutSize, float* weights,unsigned layer = 0);
 
+
+
+struct std::chrono::steady_clock::time_point;
+struct Timer
+{
+private:
+	std::chrono::steady_clock::time_point start;
+public:
+	void Start();
+	float Stop();
+};

@@ -8,7 +8,6 @@ namespace TNNT
 		unsigned Nodes;
 		unsigned Biases;
 		unsigned Weights;
-		unsigned WeightsRowCount;
 
 		unsigned SubLayers = 0;
 		

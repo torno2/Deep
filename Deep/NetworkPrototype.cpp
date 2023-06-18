@@ -106,7 +106,7 @@ namespace TNNT
 
 	NetworkPrototype::~NetworkPrototype()
 	{
-		delete[] m_LayerLayout;
+		
 
 		delete[] m_ZBuffer;
 		delete[] m_DeltaZ;
@@ -127,9 +127,16 @@ namespace TNNT
 		delete[] m_InternalInputBuffer;
 		delete[] m_InternalTargetBuffer;
 
-		m_Functions.DestroyFunctionsLayout();
+
+
+		//delete[] m_LayerLayout;
+
+		//m_Functions.DestroyFunctionsLayout();
 
 	}
+
+	
+
 
 	float NetworkPrototype::CheckSuccessRate()
 	{
@@ -379,6 +386,11 @@ void NetworkPrototype::SetWeightsToTemp()
 	void NetworkPrototype::TrainMasterFunction()
 	{
 
+		//Timer start
+		auto start = std::chrono::high_resolution_clock::now();
+
+
+
 
 		const unsigned batchNum = m_Data->TrainingCount / m_HyperParameters.BatchCount;
 		const unsigned remainingBatch = m_Data->TrainingCount % m_HyperParameters.BatchCount;
@@ -479,13 +491,18 @@ void NetworkPrototype::SetWeightsToTemp()
 
 
 		delete[] indicies;
+
+		//Timer stop
+		auto stop = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<float>  time = stop - start;
+		m_LastTime = time.count();
 	}
 
 	
 	float NetworkPrototype::CheckCostMasterFunction( )
 	{
 
-		
+		auto start = std::chrono::high_resolution_clock::now();
 		m_PositionData.A = m_ABufferCount - m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
 
 		float cost = 0;
@@ -505,12 +522,21 @@ void NetworkPrototype::SetWeightsToTemp()
 		}
 
 		cost = cost / ((float)m_Data->TestCount);
+
+
+		auto stop = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<float>  time = stop - start;
+		//m_LastTime[1] = time.count();
+
+
 		return cost;
 
 	}
 
 	float NetworkPrototype::CheckSuccessRateMasterFunction()
 	{
+		auto start = std::chrono::high_resolution_clock::now();
+
 		const unsigned Ap = m_ABufferCount - m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
 
 		float score = 0.0f;
@@ -534,6 +560,7 @@ void NetworkPrototype::SetWeightsToTemp()
 					championItterator = outputIndex;
 				}
 
+
 				outputIndex++;
 			}
 
@@ -545,6 +572,10 @@ void NetworkPrototype::SetWeightsToTemp()
 		}
 
 		float rate = score / ((float)m_Data->TestCount);
+
+		auto stop = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<float>  time = stop - start;
+		//m_LastTime[2] = time.count();
 
 		return rate;
 

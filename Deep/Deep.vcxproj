@@ -159,6 +159,9 @@
     <None Include="trainIm.idx3-ubyte" />
     <None Include="trainLabel.idx1-ubyte" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Experiment.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

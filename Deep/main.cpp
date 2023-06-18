@@ -13,10 +13,10 @@ int main() {
 #if 2 < 3
 	{
 		using namespace TNNT;
-
+		Timer t;
 
 		//DataFormating start
-		auto start = std::chrono::high_resolution_clock::now();
+		t.Start();
 
 		DataSet data;
 		{
@@ -45,201 +45,149 @@ int main() {
 
 
 		}
+		pr("Data formating time:" << t.Stop() << "s");
 
-
-		auto stop = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<float>  time = stop - start;
-		pr("Data formating time:" << time.count() << "s");
 		//Data Formating end
 
 
 
 
 
-
-		//Network setup start
-
-		start = std::chrono::high_resolution_clock::now();
-
-		unsigned int layoutCount = 3;
-		unsigned int* layout = new unsigned int[layoutCount];
-		{
-			layout[0] = 784;
-			layout[1] = 300;
-			layout[2] = 10;
-		}
-
-		LayerFucntionsLayout funcLayout;
-		{
-			funcLayout.CostFunction = Math::CrossEntropy;
-			funcLayout.CostFunctionDerivative = Math::CrossEntropyCostDerivative;
-			funcLayout.NeuronFunction = new LayerFucntionsLayout::NeuronFunctionPointer[layoutCount - 1];
-			for (int i = 0; i < layoutCount - 1; i++)
-			{
-				funcLayout.NeuronFunction[i].Function = Math::Sigmoid;
-			}
-
-			funcLayout.NeuronFunctionDerivative = new LayerFucntionsLayout::NeuronFunctionPointer[layoutCount - 2];
-			for (int i = 0; i < layoutCount - 2; i++)
-			{
-				funcLayout.NeuronFunctionDerivative[i].Function = Math::SigmoidDerivative;
-			}
-		}
+		std::ofstream efile;
+		efile.open("Experiment.txt");
 
 
-		NeuralNetwork n(layout,layoutCount,funcLayout, true);
-
-		//Network setup stop
-
-
-
-
-		
-
-		//Prototype Network setup start
-
-		unsigned int playoutCount = 3;
-		LayerLayout* pLayout = new LayerLayout[playoutCount];
-		{
-			pLayout[0].Nodes = 28 * 28;
-			pLayout[0].Biases = 0;
-			pLayout[0].Weights = 0;
-			pLayout[0].WeightsRowCount = 0;
-
-			pLayout[1].Nodes = 300;
-			pLayout[1].Biases = pLayout[1].Nodes;
-			pLayout[1].Weights = pLayout[1].Nodes* pLayout[0].Nodes;
-			pLayout[1].WeightsRowCount = pLayout[0].Nodes;
-
-			pLayout[2].Nodes = 10;
-			pLayout[2].Biases = pLayout[2].Nodes;
-			pLayout[2].Weights = pLayout[2].Nodes* pLayout[1].Nodes;
-			pLayout[2].WeightsRowCount = pLayout[1].Nodes;
-
-
-		}
-
-		FunctionsLayout pFuncLayout;
+	#if 2<3
+		unsigned int testlayoutCount = 3;
+		FunctionsLayout testFuncLayout;
 		{
 
-			pFuncLayout.NeuronFunctions = new FunctionsLayout::NeuronFunction[playoutCount -1];
+			testFuncLayout.NeuronFunctions = new FunctionsLayout::NeuronFunction[testlayoutCount - 1];
 			{
-				pFuncLayout.NeuronFunctions[0].f = Math::Sigmoid;
-				pFuncLayout.NeuronFunctions[1].f = Math::Sigmoid;
-			;
+				testFuncLayout.NeuronFunctions[0].f = Math::Sigmoid;
+				testFuncLayout.NeuronFunctions[1].f = Math::Sigmoid;
+				;
 			}
-			pFuncLayout.NeuronFunctionsDerivatives = new FunctionsLayout::NeuronFunction[playoutCount - 1];
+			testFuncLayout.NeuronFunctionsDerivatives = new FunctionsLayout::NeuronFunction[testlayoutCount - 1];
 			{
-				pFuncLayout.NeuronFunctionsDerivatives[0].f = Math::SigmoidDerivative;
-				pFuncLayout.NeuronFunctionsDerivatives[1].f = Math::SigmoidDerivative;
-				
-			}
+				testFuncLayout.NeuronFunctionsDerivatives[0].f = Math::SigmoidDerivative;
+				testFuncLayout.NeuronFunctionsDerivatives[1].f = Math::SigmoidDerivative;
 
-			pFuncLayout.FeedForwardCallBackFunctions = new FunctionsLayout::NetworkRelayFunction[playoutCount - 1];
-			{
-				pFuncLayout.FeedForwardCallBackFunctions[0].f = LayerFunctions::FullyConnectedFeedForward;
-				pFuncLayout.FeedForwardCallBackFunctions[1].f = LayerFunctions::FullyConnectedFeedForward;
-				
 			}
 
-			pFuncLayout.BackPropegateCallBackFunctionsZ = new FunctionsLayout::NetworkRelayFunction[playoutCount - 2];
+			testFuncLayout.FeedForwardCallBackFunctions = new FunctionsLayout::NetworkRelayFunction[testlayoutCount - 1];
 			{
-				pFuncLayout.BackPropegateCallBackFunctionsZ[0].f = LayerFunctions::FullyConnectedBackpropegateZ;
-				
-				
+				testFuncLayout.FeedForwardCallBackFunctions[0].f = LayerFunctions::FullyConnectedFeedForward;
+				testFuncLayout.FeedForwardCallBackFunctions[1].f = LayerFunctions::FullyConnectedFeedForward;
+
 			}
 
-			pFuncLayout.BackPropegateCallBackFunctionsBW = new FunctionsLayout::NetworkRelayFunction[playoutCount - 1];
+			testFuncLayout.BackPropegateCallBackFunctionsZ = new FunctionsLayout::NetworkRelayFunction[testlayoutCount - 2];
 			{
-				pFuncLayout.BackPropegateCallBackFunctionsBW[0].f = LayerFunctions::FullyConnectedBackpropegateBW;
-				pFuncLayout.BackPropegateCallBackFunctionsBW[1].f = LayerFunctions::FullyConnectedBackpropegateBW;
+				testFuncLayout.BackPropegateCallBackFunctionsZ[0].f = LayerFunctions::FullyConnectedBackpropegateZ;
+
+
+			}
+
+			testFuncLayout.BackPropegateCallBackFunctionsBW = new FunctionsLayout::NetworkRelayFunction[testlayoutCount - 1];
+			{
+				testFuncLayout.BackPropegateCallBackFunctionsBW[0].f = LayerFunctions::FullyConnectedBackpropegateBW;
+				testFuncLayout.BackPropegateCallBackFunctionsBW[1].f = LayerFunctions::FullyConnectedBackpropegateBW;
 			}
 
 
 
-			pFuncLayout.CostFunction.f = CostFunctions::CrossEntropy;
-			pFuncLayout.CostFunctionDerivative.f = CostFunctions::CrossEntropyDerivative;
+			testFuncLayout.CostFunction.f = CostFunctions::CrossEntropy;
+			testFuncLayout.CostFunctionDerivative.f = CostFunctions::CrossEntropyDerivative;
 
 
-			pFuncLayout.RegularizationFunction.f = TrainingFunctions::L2Regularization;
-			pFuncLayout.TrainingFunction.f = TrainingFunctions::GradientDecent;
-		}
-
-		NetworkPrototype pN(pLayout, pFuncLayout , playoutCount, true);
-
-		//Prototype Network setup stop
-
-
-
-		stop = std::chrono::high_resolution_clock::now();
-
-
-		HyperParameters params;
-		{
-			params.Epochs = 1;
-
-			params.BatchCount = 10;
-			params.LearningRate = 0.05f;
-			params.RegularizationConstant = 0.01f;
+			testFuncLayout.RegularizationFunction.f = TrainingFunctions::L2Regularization;
+			testFuncLayout.TrainingFunction.f = TrainingFunctions::GradientDecent;
 		}
 
 
-		time = stop - start;
-		pr("Network setup time:" << time.count() << "s");
-		//Network setup end
+		t.Start();
+		unsigned experiments = 0;
 
-		
-		pr("New");
-		pr("Prototype: ");
+		unsigned i = 1;
+		while (i < 21)
 		{
 			
-			//Training start
-			start = std::chrono::high_resolution_clock::now();
+			LayerLayout* testLayout = new LayerLayout[testlayoutCount];
+			{
+				testLayout[0].Nodes = 28 * 28;
+				testLayout[0].Biases = 0;
+				testLayout[0].Weights = 0;
 
-			pN.Train(data, params);
+				testLayout[1].Nodes = 5*i;
+				testLayout[1].Biases = testLayout[1].Nodes;
+				testLayout[1].Weights = testLayout[1].Nodes * testLayout[0].Nodes;
 
-			stop = std::chrono::high_resolution_clock::now();
-			time = stop - start;
-			pr("Train time: " << time.count() << "s");
-			//Traning End
+				testLayout[2].Nodes = 10;
+				testLayout[2].Biases = testLayout[2].Nodes;
+				testLayout[2].Weights = testLayout[2].Nodes * testLayout[1].Nodes;
 
 
-			//Check Start
-			start = std::chrono::high_resolution_clock::now();
+			}
 
-			pr("Cost: " << pN.CheckCost());
-			pr("Guessrate: " << pN.CheckSuccessRate());
+			experiments++;
+			efile << "Experiment: " << experiments << '\n' << '\n';
+			
 
-			stop = std::chrono::high_resolution_clock::now();
-			time = stop - start;
-			pr("Check time: " << time.count() << "s");
-			//Check Stop
+			
+			
+			efile << "Nodes in hidden layer: " << testLayout[1].Nodes << '\n' << '\n';
+
+
+
+
+			efile << "Testing network using different learning rates: " << '\n' << '\n';
+			unsigned j = 1;
+			while (j < 11)
+			{
+				NetworkPrototype testN(testLayout, testFuncLayout, testlayoutCount);
+
+				HyperParameters testparams;
+				{
+					testparams.Epochs = 1;
+
+					testparams.BatchCount = 10;
+					testparams.LearningRate = 0.002f*j;
+					testparams.RegularizationConstant = 0.01f;
+				}
+
+				
+				
+				
+
+				testN.Train(data, testparams);
+
+				efile << j << " : " << testparams.LearningRate << '\n' << "Results: | Cost: " << testN.CheckCost() << " |  Success Rate: " << testN.CheckSuccessRate() << '\n' << '\n';
+
+				j++;
+
+
+				efile << "Training duration: " << testN.m_LastTime << '\n' << '\n';
+			}
+			
+			
+
+
+
+			delete[] testLayout;
+			
+
+			i++;
+			
+			
 		}
 
-		pr("Old: ");
-		{
-			//Training start
-			start = std::chrono::high_resolution_clock::now();
+		efile.close();
 
-			n.Train(data, params);
+		testFuncLayout.DestroyFunctionsLayout();
+		pr("Experiments completed. Duration: " << t.Stop() << "s");
 
-			stop = std::chrono::high_resolution_clock::now();
-			time = stop - start;
-			pr("Train time: " << time.count() << "s");
-			//Traning End
-
-
-			//Check Start
-			start = std::chrono::high_resolution_clock::now();
-
-			pr("Cost: " << n.CheckCost(data));
-			pr("Guessrate: " << n.CheckSuccessRate(data));
-
-			stop = std::chrono::high_resolution_clock::now();
-			time = stop - start;
-			pr("Check time: " << time.count() << "s");
-			//Check Stop
-		}
+	#endif
 
 
 

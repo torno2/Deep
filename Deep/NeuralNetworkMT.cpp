@@ -58,8 +58,8 @@ namespace TNNT
 		unsigned flagIndex = 0;
 		while (flagIndex < m_SlaveThreadCount)
 		{
-			m_Locks[flagIndex] = false;
-			m_Locks[flagIndex +1] = false;
+			m_Locks[flagIndex*2] = false;
+			m_Locks[flagIndex*2 +1] = false;
 			m_SlaveFlags[flagIndex] = false;
 			flagIndex++;
 		}
@@ -1037,8 +1037,8 @@ namespace TNNT
 		{
 			if (i == thread)
 			{
-				m_Locks[i + m_SlaveThreadCount] = false;
-				m_Locks[i] = true;
+				m_Locks[2*i+1] = false;
+				m_Locks[2*i] = true;
 			}
 			if (!m_Locks[i])
 			{
@@ -1047,12 +1047,13 @@ namespace TNNT
 			i++;
 		}
 
-		while (i < m_SlaveThreadCount * 2)
+		i = 0;
+		while (i < m_SlaveThreadCount )
 		{
 			if (i == (thread + m_SlaveThreadCount))
 			{
-				m_Locks[i - m_SlaveThreadCount] = false;
-				m_Locks[i] = true;
+				m_Locks[2*i] = false;
+				m_Locks[2*i+1] = true;
 			}
 			if (!m_Locks[i])
 			{
