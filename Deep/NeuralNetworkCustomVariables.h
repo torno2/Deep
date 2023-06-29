@@ -8,8 +8,6 @@ namespace TNNT
 		unsigned Nodes;
 		unsigned Biases;
 		unsigned Weights;
-
-		unsigned SubLayers = 0;
 		
 	};
 
@@ -89,7 +87,7 @@ namespace TNNT
 
 
 		
-		void DestroyFunctionsLayout()
+		~FunctionsLayout()
 		{
 			delete[] NeuronFunctions;
 			delete[] NeuronFunctionsDerivatives;
@@ -101,6 +99,66 @@ namespace TNNT
 
 	};
 
+	class NetworkPrototypeMT;
+	struct FunctionsLayoutMT
+	{
+
+		struct NeuronFunction
+		{
+			float (*f)(float z);
+		};
+		struct NetworkRelayFunctionMT
+		{
+			void (*f)(NetworkPrototypeMT* n, unsigned thread);
+		};
+
+
+
+
+		//NeuronFunctions and their derivatives
+		NeuronFunction* NeuronFunctions;
+		//Derivatives here are not in reverse order compared to layers.
+		NeuronFunction* NeuronFunctionsDerivatives;
+
+
+
+		//Functions that descripe how layers are connected and what operations are preformed on their activations.
+		//Count of this array is m_LayerLayoutCount-1, where the first element applies to the zs of the second layer (no zs in the inputlayer) and the last applies to the zs of the outputlayer.
+		NetworkRelayFunctionMT* FeedForwardCallBackFunctions;
+
+		//The output layert has its derivative (with repect to z) calculated in the CostFunctionDerivative function, so the Count of this array is m_LayerLayoutCount-2. Function for the last layer is supposed to be first in the array.
+		NetworkRelayFunctionMT* BackPropegateCallBackFunctionsZ; //Meant for calculating the entries of m_DeltaZ
+		//This one has a count of m_LayerLayoutCount-1
+		NetworkRelayFunctionMT* BackPropegateCallBackFunctionsBW; //Meant for calculating the entries of m_DeltaBiases and m_DeltaWeights
+
+
+		//Cost function. Its "derivative" is used as the beackpropegation function for the last layer.
+		NetworkRelayFunctionMT CostFunction;
+		//Is supposed to be the derivative with respects to z in the outputlayer, effectively meaning that this function is: dC/da * da/dz.
+		NetworkRelayFunctionMT CostFunctionDerivative;
+
+
+
+
+		//For the trainingprocess
+		NetworkRelayFunctionMT TrainingFunction;
+
+		NetworkRelayFunctionMT RegularizationFunction;
+
+
+
+
+		~FunctionsLayoutMT()
+		{
+			delete[] NeuronFunctions;
+			delete[] NeuronFunctionsDerivatives;
+
+			delete[] FeedForwardCallBackFunctions;
+			delete[] BackPropegateCallBackFunctionsZ;
+			delete[] BackPropegateCallBackFunctionsBW;
+		}
+
+	};
 
 
 

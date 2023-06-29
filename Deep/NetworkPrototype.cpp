@@ -7,9 +7,52 @@ namespace TNNT
 	//Constructors And destructor
 
 	NetworkPrototype::NetworkPrototype(LayerLayout* layerLayout, FunctionsLayout& functions, unsigned layoutCount, bool randomizeWeightsAndBiases)
-		: m_LayerLayout(layerLayout), m_LayerLayoutCount(layoutCount), m_Functions(functions)
+		:  m_LayerLayoutCount(layoutCount), m_Functions(functions)
 	{
 
+
+		m_LayerLayout = new LayerLayout[m_LayerLayoutCount];
+
+
+		m_Functions.NeuronFunctions = new FunctionsLayout::NeuronFunction[m_LayerLayoutCount - 1];
+		m_Functions.NeuronFunctionsDerivatives = new FunctionsLayout::NeuronFunction[m_LayerLayoutCount - 1];
+
+		m_Functions.FeedForwardCallBackFunctions = new FunctionsLayout::NetworkRelayFunction[m_LayerLayoutCount - 1];
+		m_Functions.BackPropegateCallBackFunctionsZ = new FunctionsLayout::NetworkRelayFunction[m_LayerLayoutCount - 2];
+		m_Functions.BackPropegateCallBackFunctionsBW = new FunctionsLayout::NetworkRelayFunction[m_LayerLayoutCount - 1];
+
+		m_Functions.CostFunction = functions.CostFunction;
+		m_Functions.CostFunctionDerivative = functions.CostFunctionDerivative;
+
+		m_Functions.TrainingFunction = functions.TrainingFunction;
+		m_Functions.RegularizationFunction = functions.RegularizationFunction;
+
+
+
+		unsigned layoutIndex = 0;
+		while (layoutIndex < m_LayerLayoutCount)
+		{
+			m_LayerLayout[layoutIndex] = layerLayout[layoutIndex];
+
+			if (layoutIndex < m_LayerLayoutCount - 1)
+			{
+				m_Functions.NeuronFunctions[layoutIndex] = functions.NeuronFunctions[layoutIndex];
+				m_Functions.NeuronFunctionsDerivatives[layoutIndex] = functions.NeuronFunctionsDerivatives[layoutIndex];
+
+				m_Functions.FeedForwardCallBackFunctions[layoutIndex] = functions.FeedForwardCallBackFunctions[layoutIndex];
+				m_Functions.BackPropegateCallBackFunctionsBW[layoutIndex] = functions.BackPropegateCallBackFunctionsBW[layoutIndex];
+
+
+
+				if (layoutIndex < m_LayerLayoutCount - 2)
+				{
+					m_Functions.BackPropegateCallBackFunctionsZ[layoutIndex] = functions.BackPropegateCallBackFunctionsZ[layoutIndex];
+				}
+
+			}
+
+			layoutIndex++;
+		}
 
 		// 1 layer no network makes; need at least 2
 		assert(m_LayerLayoutCount >= 2);
@@ -23,7 +66,7 @@ namespace TNNT
 		unsigned biasTotal = 0;
 		unsigned weightTotal = 0;
 
-		unsigned layoutIndex = 0;
+		layoutIndex = 0;
 		while (layoutIndex < m_LayerLayoutCount)
 		{
 			// A layer of zero nodes would mean you have two separate networks (or a network with 1 less layer, if the input/output layer is missing), 
@@ -106,7 +149,7 @@ namespace TNNT
 
 	NetworkPrototype::~NetworkPrototype()
 	{
-		
+		delete[] m_LayerLayout;
 
 		delete[] m_ZBuffer;
 		delete[] m_DeltaZ;
@@ -129,9 +172,7 @@ namespace TNNT
 
 
 
-		//delete[] m_LayerLayout;
-
-		//m_Functions.DestroyFunctionsLayout();
+		
 
 	}
 
@@ -148,9 +189,9 @@ namespace TNNT
 		return CheckCostMasterFunction();
 	}
 
-	void NetworkPrototype::Train(DataSet& data, HyperParameters& params)
+	void NetworkPrototype::Train(DataSet* data, HyperParameters& params)
 	{
-		SetData(&data);
+		SetData(data);
 		SetHyperParameters(params);
 		TrainMasterFunction();
 	}
@@ -213,21 +254,34 @@ void NetworkPrototype::SetWeightsToTemp()
 
 	void NetworkPrototype::SetData(DataSet* data)
 	{
+		delete[] m_Indices;
 
 		m_Data = data;
 
-		
+		m_Indices = new unsigned[m_Data->TrainingCount];
+
+
+
+		unsigned index = 0;
+		while (index < m_Data->TrainingCount)
+		{
+			m_Indices[index] = index;
+			index++;
+		}
+
 	}
 
 
 
 	void NetworkPrototype::SetHyperParameters(HyperParameters& params)
 	{
+		
 		delete[] m_InternalInputBuffer;
 		delete[] m_InternalTargetBuffer;
 
 		m_HyperParameters = params;
 
+		
 		m_InternalInputBuffer = new float[m_HyperParameters.BatchCount * m_LayerLayout[0].Nodes];
 		m_InternalTargetBuffer = new float[m_HyperParameters.BatchCount * m_LayerLayout[m_LayerLayoutCount-1].Nodes];
 
@@ -265,12 +319,15 @@ void NetworkPrototype::SetWeightsToTemp()
 
 	void NetworkPrototype::FeedForward()
 	{
-		
-		m_PositionData.Layer = 1;
-		m_PositionData.Z = 0;
-		m_PositionData.A= m_LayerLayout[0].Nodes;
-		m_PositionData.Biases= m_LayerLayout[0].Biases;
-		m_PositionData.Weights = m_LayerLayout[0].Weights;
+
+
+		{
+			m_PositionData.Layer = 1;
+			m_PositionData.Z = 0;
+			m_PositionData.A = m_LayerLayout[0].Nodes;
+			m_PositionData.Biases = m_LayerLayout[0].Biases;
+			m_PositionData.Weights = m_LayerLayout[0].Weights;
+		}
 
 		unsigned layoutIndex = 1;
 
@@ -283,17 +340,22 @@ void NetworkPrototype::SetWeightsToTemp()
 
 
 
-			m_PositionData.Z += m_LayerLayout[m_PositionData.Layer].Nodes;
+			{
+				m_PositionData.Z += m_LayerLayout[m_PositionData.Layer].Nodes;
 
-			m_PositionData.A += m_LayerLayout[m_PositionData.Layer].Nodes;
+				m_PositionData.A += m_LayerLayout[m_PositionData.Layer].Nodes;
 
-			m_PositionData.Biases += m_LayerLayout[m_PositionData.Layer].Biases;
+				m_PositionData.Biases += m_LayerLayout[m_PositionData.Layer].Biases;
 
-			m_PositionData.Weights += m_LayerLayout[m_PositionData.Layer].Weights;
+				m_PositionData.Weights += m_LayerLayout[m_PositionData.Layer].Weights;
 
-			m_PositionData.Layer++;
+				m_PositionData.Layer++;
+
+			}
+
 
 			layoutIndex++;
+
 		}
 
 	}
@@ -301,17 +363,18 @@ void NetworkPrototype::SetWeightsToTemp()
 	void NetworkPrototype::Backpropegate()
 	{
 
-
-
 		unsigned lastLayer = m_LayerLayoutCount - 1;
 
-		m_PositionData.Layer = lastLayer;
+		
+		{
+			m_PositionData.Layer = lastLayer;
 
-		m_PositionData.Z = m_ZBufferCount- m_LayerLayout[lastLayer].Nodes;
-		m_PositionData.A = m_ABufferCount - m_LayerLayout[lastLayer].Nodes;
+			m_PositionData.Z = m_ZBufferCount - m_LayerLayout[lastLayer].Nodes;
+			m_PositionData.A = m_ABufferCount - m_LayerLayout[lastLayer].Nodes;
 
-		m_PositionData.Biases = m_BiasesCount - m_LayerLayout[lastLayer].Biases;
-		m_PositionData.Weights = m_WeightsCount - m_LayerLayout[lastLayer].Weights;
+			m_PositionData.Biases = m_BiasesCount - m_LayerLayout[lastLayer].Biases;
+			m_PositionData.Weights = m_WeightsCount - m_LayerLayout[lastLayer].Weights;
+		}
 
 
 
@@ -323,30 +386,35 @@ void NetworkPrototype::SetWeightsToTemp()
 
 		unsigned reveresLayoutIndex = 0;
 		
-		while (reveresLayoutIndex < lastLayer-1 )
+		while (reveresLayoutIndex < lastLayer - 1)
 		{
 			m_Functions.BackPropegateCallBackFunctionsBW[reveresLayoutIndex].f(this);
 
-			//Alters position data to be more in line with the layer in question
-			{
 
+			//Alters position data to be more in line with the layer in question
+
+			{
 				m_PositionData.Layer--;
 
-				m_PositionData.Z -= m_LayerLayout[m_PositionData.Layer ].Nodes;
+				m_PositionData.Z -= m_LayerLayout[m_PositionData.Layer].Nodes;
 
-				m_PositionData.A -= m_LayerLayout[m_PositionData.Layer ].Nodes;
+				m_PositionData.A -= m_LayerLayout[m_PositionData.Layer].Nodes;
 
-				m_PositionData.Biases -= m_LayerLayout[m_PositionData.Layer ].Biases;
+				m_PositionData.Biases -= m_LayerLayout[m_PositionData.Layer].Biases;
 
-				m_PositionData.Weights -= m_LayerLayout[m_PositionData.Layer ].Weights;
+				m_PositionData.Weights -= m_LayerLayout[m_PositionData.Layer].Weights;
 			}
+
+
 
 			m_Functions.BackPropegateCallBackFunctionsZ[reveresLayoutIndex].f(this);
 		
+
 			reveresLayoutIndex++;
 		}
 
 		m_Functions.BackPropegateCallBackFunctionsBW[reveresLayoutIndex].f(this);
+
 	}
 
 
@@ -354,11 +422,11 @@ void NetworkPrototype::SetWeightsToTemp()
 	void NetworkPrototype::TrainOnSet(unsigned num)
 	{
 
-
 		m_Functions.RegularizationFunction.f(this);
 
+
 		unsigned exampleIndex = 0;
-		while (exampleIndex < num)
+		while (exampleIndex < m_HyperParameters.BatchCount)
 		{
 
 			SetInput(&(m_InternalInputBuffer[exampleIndex * m_LayerLayout[0].Nodes]));
@@ -380,6 +448,7 @@ void NetworkPrototype::SetWeightsToTemp()
 
 		SetBiasesToTemp();
 		SetWeightsToTemp();
+
 	}
 
 
@@ -397,14 +466,6 @@ void NetworkPrototype::SetWeightsToTemp()
 
 		std::mt19937 mt;
 
-		unsigned* indicies = new unsigned[m_Data->TrainingCount];
-		unsigned index = 0;
-		while (index < m_Data->TrainingCount)
-		{
-			indicies[index] = index;
-			index++;
-		}
-
 		unsigned epochNum = 0;
 		while (epochNum < m_HyperParameters.Epochs)
 		{
@@ -420,9 +481,9 @@ void NetworkPrototype::SetWeightsToTemp()
 
 					unsigned randomIndex = mt() % randomIndexCount;
 
-					unsigned epochRandomIndex = indicies[randomIndex];
-					indicies[randomIndex] = indicies[randomIndexCount - 1];
-					indicies[randomIndexCount - 1] = epochRandomIndex;
+					unsigned epochRandomIndex = m_Indices[randomIndex];
+					m_Indices[randomIndex] = m_Indices[randomIndexCount - 1];
+					m_Indices[randomIndexCount - 1] = epochRandomIndex;
 
 					unsigned inputIndex = 0;
 					while (inputIndex < m_LayerLayout[0].Nodes)
@@ -441,6 +502,7 @@ void NetworkPrototype::SetWeightsToTemp()
 
 
 					randomIndexCount--;
+
 					batchIndex++;
 				}
 
@@ -458,9 +520,9 @@ void NetworkPrototype::SetWeightsToTemp()
 
 					unsigned randomIndex = mt() % randomIndexCount;
 
-					unsigned epochRandomIndex = indicies[randomIndex];
-					indicies[randomIndex] = indicies[randomIndexCount - 1];
-					indicies[randomIndexCount - 1] = epochRandomIndex;
+					unsigned epochRandomIndex = m_Indices[randomIndex];
+					m_Indices[randomIndex] = m_Indices[randomIndexCount - 1];
+					m_Indices[randomIndexCount - 1] = epochRandomIndex;
 
 					unsigned inputIndex = 0;
 					while (inputIndex < m_LayerLayout[0].Nodes)
@@ -488,14 +550,12 @@ void NetworkPrototype::SetWeightsToTemp()
 
 			epochNum++;
 		}
-
-
-		delete[] indicies;
+		
 
 		//Timer stop
 		auto stop = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<float>  time = stop - start;
-		m_LastTime = time.count();
+		m_LastTime[0] = time.count();
 	}
 
 	
@@ -503,33 +563,34 @@ void NetworkPrototype::SetWeightsToTemp()
 	{
 
 		auto start = std::chrono::high_resolution_clock::now();
-		m_PositionData.A = m_ABufferCount - m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
+		
 
-		float cost = 0;
+		m_CostBuffer = 0;
 
 		unsigned checkIndex = 0;
 		while (checkIndex < m_Data->TestCount)
 		{
+
 			SetInput(&m_Data->TestInputs[checkIndex * m_LayerLayout[0].Nodes]);
 			SetTarget(&m_Data->TestTargets[checkIndex * m_LayerLayout[m_LayerLayoutCount - 1].Nodes]);
+			
+			
 			FeedForward();
-			m_PositionData.A = m_ABufferCount - m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
+			
 			m_Functions.CostFunction.f(this);
 			
-			cost += m_CostBuffer;
 
 			checkIndex++;
 		}
 
-		cost = cost / ((float)m_Data->TestCount);
 
 
 		auto stop = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<float>  time = stop - start;
-		//m_LastTime[1] = time.count();
+		m_LastTime[1] = time.count();
 
 
-		return cost;
+		return  m_CostBuffer / ((float)m_Data->TestCount);
 
 	}
 
@@ -575,7 +636,7 @@ void NetworkPrototype::SetWeightsToTemp()
 
 		auto stop = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<float>  time = stop - start;
-		//m_LastTime[2] = time.count();
+		m_LastTime[2] = time.count();
 
 		return rate;
 

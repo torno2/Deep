@@ -997,7 +997,7 @@ namespace TNNT
 		SpinLockMT(thread);
 		SetBiasesToTempMT(thread);
 		SetWeightsToTempMT(thread);
-		SpinLockMT(thread);
+	
 	}
 
 
@@ -1015,7 +1015,7 @@ namespace TNNT
 		}
 		else 
 		{
-			if (thread < workCount % m_SlaveThreadCount)
+			if (thread < (workCount % m_SlaveThreadCount) )
 			{
 				start = ((workCount / m_SlaveThreadCount) + 1) * thread;
 				stop = start + ((workCount / m_SlaveThreadCount) + 1);
@@ -1037,8 +1037,8 @@ namespace TNNT
 		{
 			if (i == thread)
 			{
-				m_Locks[2*i+1] = false;
-				m_Locks[2*i] = true;
+				m_Locks[i+ m_SlaveThreadCount] = false;
+				m_Locks[i] = true;
 			}
 			if (!m_Locks[i])
 			{
@@ -1046,14 +1046,12 @@ namespace TNNT
 			}
 			i++;
 		}
-
-		i = 0;
-		while (i < m_SlaveThreadCount )
+		while (i < 2*m_SlaveThreadCount )
 		{
 			if (i == (thread + m_SlaveThreadCount))
 			{
-				m_Locks[2*i] = false;
-				m_Locks[2*i+1] = true;
+				m_Locks[i- m_SlaveThreadCount] = false;
+				m_Locks[i] = true;
 			}
 			if (!m_Locks[i])
 			{
@@ -1138,20 +1136,12 @@ namespace TNNT
 
 		m_MasterControlPoint = 0;
 
-		std::thread* slaves = new std::thread[m_SlaveThreadCount];
-		unsigned slaveThread = 0;
-		while (slaveThread < m_SlaveThreadCount)
-		{
-			slaves[slaveThread] = std::thread(&NeuralNetworkMT::TrainMTSlaveThreadFunction, this, traningInputs, traningTargets, sharedInputBuffer, sharedTargetBuffer, indices, num, epochs, batchSize,learningRate, regConst, slaveThread);
-			slaveThread++;
-		}
+
 
 	
 
 		const unsigned batchCount = num / batchSize;
 		const unsigned remainingBatch = num % batchSize;
-
-		std::mt19937 mt;
 
 		unsigned index = 0;
 		while (index < num)
@@ -1160,11 +1150,13 @@ namespace TNNT
 			index++;
 		}
 
+		std::mt19937 mt;
+
 		unsigned epochCount = 0;
 		while (epochCount < epochs)
 		{
 			unsigned randomIndexCount = num;
-			unsigned randomIndexStep = 0;
+			
 
 			unsigned batchNum = 0;
 			while (batchNum < batchCount)
@@ -1175,16 +1167,19 @@ namespace TNNT
 
 					unsigned randomIndex = mt() % randomIndexCount;
 
-					unsigned epochRandomIndex = indices[randomIndex+randomIndexStep];
-					indices[randomIndex + randomIndexStep] = indices[randomIndexStep];
-					indices[randomIndexStep] = epochRandomIndex;
+					unsigned epochRandomIndex = indices[randomIndex];
+					indices[randomIndex] = indices[randomIndexCount - 1];
+					indices[randomIndexCount - 1] = epochRandomIndex;
 
-					randomIndexStep++;
+					
 					randomIndexCount--;	
+
 					batchIndex++;
 				}
 				//Used to prevent the slave threads from getting too far ahead
+				
 				m_MasterControlPoint++;
+				
 				batchNum++;
 			}
 
@@ -1197,11 +1192,10 @@ namespace TNNT
 
 					unsigned randomIndex = mt() % randomIndexCount;
 
-					unsigned epochRandomIndex = indices[randomIndex + randomIndexStep];
-					indices[randomIndex + randomIndexStep] = indices[randomIndexStep];
-					indices[randomIndexStep] = epochRandomIndex;
+					unsigned epochRandomIndex = indices[randomIndex];
+					indices[randomIndex] = indices[randomIndexCount - 1];
+					indices[randomIndexCount - 1] = epochRandomIndex;
 
-					randomIndexStep++;
 					randomIndexCount--;
 					batchIndex++;
 
@@ -1213,6 +1207,14 @@ namespace TNNT
 
 
 			epochCount++;
+		}
+
+		std::thread* slaves = new std::thread[m_SlaveThreadCount];
+		unsigned slaveThread = 0;
+		while (slaveThread < m_SlaveThreadCount)
+		{
+			slaves[slaveThread] = std::thread(&NeuralNetworkMT::TrainMTSlaveThreadFunction, this, traningInputs, traningTargets, sharedInputBuffer, sharedTargetBuffer, indices, num, epochs, batchSize, learningRate, regConst, slaveThread);
+			slaveThread++;
 		}
 
 		slaveThread = 0;
@@ -1529,9 +1531,6 @@ namespace TNNT
 		const unsigned targetSize = num * m_LayerLayout[m_LayerLayoutCount - 1];
 		const unsigned Ap = m_ABufferCount - m_LayerLayout[m_LayerLayoutCount - 1];
 
-		float score = 0.0f;
-
-
 		unsigned checkIndex = 0;
 		while (checkIndex < num)
 		{
@@ -1587,11 +1586,12 @@ namespace TNNT
 		}
 
 		float score = 0;
+		const unsigned Ap = m_ABufferCount - m_LayerLayout[m_LayerLayoutCount - 1];
 
 		unsigned checkIndex = 0;
 		while (checkIndex < num)
 		{
-			const unsigned Ap = m_ABufferCount - m_LayerLayout[m_LayerLayoutCount - 1];
+			
 
 			float champion = 0;
 			int championItterator = -1;

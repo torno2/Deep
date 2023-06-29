@@ -132,8 +132,10 @@
   <ItemGroup>
     <ClInclude Include="DataProcessing.h" />
     <ClInclude Include="LayerFunctions.h" />
+    <ClInclude Include="LayerFunctionsMT.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="NetworkPrototype.h" />
+    <ClInclude Include="NetworkPrototypeMT.h" />
     <ClInclude Include="NeuralNetworkCustomVariables.h" />
     <ClInclude Include="NeuralNetworkMT.cpp" />
     <ClInclude Include="Utils.h" />
@@ -144,7 +146,9 @@
   <ItemGroup>
     <ClCompile Include="DataProcessing.cpp" />
     <ClCompile Include="LayerFunctions.cpp" />
+    <ClCompile Include="LayerFunctionsMT.cpp" />
     <ClCompile Include="NetworkPrototype.cpp" />
+    <ClCompile Include="NetworkPrototypeMT.cpp" />
     <ClCompile Include="NeuralNetworkMT.h" />
     <ClCompile Include="NeuralNetwork.cpp" />
     <ClCompile Include="main.cpp" />

@@ -1,4 +1,3 @@
-#pragma once
 #include "pch.h"
 #include "LayerFunctions.h"
 
@@ -15,16 +14,16 @@ namespace TNNT
 				float weightedSum = 0;
 
 				unsigned prevIndex = 0;
-				while (prevIndex < n->m_LayerLayout[n->m_PositionData.Layer -1].Nodes)
+				while (prevIndex < n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes)
 				{
 					weightedSum +=
-						n->m_ABuffer[ (n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer-1].Nodes) + prevIndex] *
+						n->m_ABuffer[(n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer-1].Nodes) + prevIndex] *
 						n->m_Weights[n->m_PositionData.Weights + n->m_LayerLayout[n->m_PositionData.Layer -1].Nodes * layerIndex + prevIndex];
 
 					prevIndex++;
 				}
 
-				n->m_ZBuffer[layerIndex+n->m_PositionData.Z] = weightedSum + n->m_Biases[layerIndex+ n->m_PositionData.Biases];
+				n->m_ZBuffer[layerIndex + n->m_PositionData.Z] = weightedSum + n->m_Biases[layerIndex + n->m_PositionData.Biases];
 				n->m_ABuffer[layerIndex + n->m_PositionData.A] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(n->m_ZBuffer[layerIndex + n->m_PositionData.Z]);
 
 				layerIndex++;
@@ -35,6 +34,10 @@ namespace TNNT
 		void FullyConnectedBackpropegateZ(NetworkPrototype* n)
 		{
 			
+
+
+
+
 			const unsigned latterAPos = n->m_PositionData.A + n->m_LayerLayout[n->m_PositionData.Layer].Nodes;
 			const unsigned latterZPos = n->m_PositionData.Z + n->m_LayerLayout[n->m_PositionData.Layer].Nodes;
 
@@ -46,9 +49,9 @@ namespace TNNT
 			{
 				float errorSum = 0;
 				unsigned latterLayerIndex = 0;
-				while (latterLayerIndex < n->m_LayerLayout[n->m_PositionData.Layer+1].Nodes)
+				while (latterLayerIndex < n->m_LayerLayout[n->m_PositionData.Layer + 1].Nodes)
 				{
-					errorSum += n->m_Weights[latterWeights + n->m_LayerLayout[n->m_PositionData.Layer ].Nodes * latterLayerIndex + layerIndex ] * n->m_DeltaZ[latterZPos + latterLayerIndex];
+					errorSum += n->m_Weights[latterWeights + n->m_LayerLayout[n->m_PositionData.Layer].Nodes * latterLayerIndex + layerIndex] * n->m_DeltaZ[latterZPos + latterLayerIndex];
 					latterLayerIndex++;
 				}
 
@@ -62,6 +65,8 @@ namespace TNNT
 
 		void FullyConnectedBackpropegateBW(NetworkPrototype* n)
 		{
+
+
 
 			const unsigned prevAPos = n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes;
 
@@ -329,7 +334,7 @@ namespace TNNT
 								== n->m_ABuffer[latterLayerAPos + subLayer * latterSubLayerCount + subLayerIndex] )
 							{
 								n->m_DeltaZ[n->m_PositionData.Z + subLayer * subLayerCount + startA + height * imgWidth + width] =
-									dz * n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer-1].f(n->m_ZBuffer[n->m_PositionData.Z]);
+									dz * n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer-1].f(n->m_ZBuffer[n->m_PositionData.Z]); // f(n->m_ZBuffer[n->m_PositionData.Z]) does this need to be fixed?
 							}
 							else {
 								n->m_DeltaZ[n->m_PositionData.Z + subLayer * subLayerCount + startA + height * imgWidth + width] = 0;
@@ -362,14 +367,26 @@ namespace TNNT
 
 		void CrossEntropy(NetworkPrototype* n)
 		{
-			float cost = 0;
+
+			unsigned startAPos = n->m_ABufferCount - n->m_LayerLayout[n->m_LayerLayoutCount - 1].Nodes;
+
+
+
+
 			unsigned layerIndex = 0;
 			while (layerIndex < n->m_LayerLayout[n->m_LayerLayoutCount - 1].Nodes)
 			{
-				cost += Math::CrossEntropy(n->m_ABuffer[layerIndex + n->m_PositionData.A], n->m_TargetBuffer[layerIndex]);
+				
+				float a = n->m_ABuffer[startAPos + layerIndex];
+				float y = n->m_TargetBuffer[layerIndex];
+
+				float cost = Math::CrossEntropy(a, y);
+
+				n->m_CostBuffer += cost;
+
+
 				layerIndex++;
 			}
-			n->m_CostBuffer = cost;
 		}
 
 		void CrossEntropyDerivative(NetworkPrototype* n)
@@ -396,10 +413,14 @@ namespace TNNT
 		}
 	}
 
-	namespace TrainingFunctions {
+	namespace TrainingFunctions 
+	{
 
 		void L2Regularization(NetworkPrototype* n)
 		{
+
+
+
 			unsigned index = 0;
 			while (index < n->m_WeightsCount)
 			{
@@ -417,7 +438,6 @@ namespace TNNT
 			while (i < n->m_WeightsCount)
 			{
 
-
 				n->m_WeightsBuffer[i] -= (n->m_HyperParameters.LearningRate / ((float)n->m_HyperParameters.BatchCount)) * n->m_DeltaWeights[i];
 
 				i++;
@@ -426,7 +446,9 @@ namespace TNNT
 			i = 0;
 			while (i < n->m_BiasesCount)
 			{
+
 				n->m_BiasesBuffer[i] -= (n->m_HyperParameters.LearningRate / ((float)n->m_HyperParameters.BatchCount)) * n->m_DeltaBiases[i];
+
 				i++;
 			}
 		}

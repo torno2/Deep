@@ -40,6 +40,7 @@ namespace TNNT {
 		
 		HyperParameters m_HyperParameters;
 		
+		unsigned* m_Indices = nullptr;
 		float* m_InternalInputBuffer = nullptr;
 		float* m_InternalTargetBuffer = nullptr;
 		
@@ -47,7 +48,7 @@ namespace TNNT {
 		DataSet* m_Data;
 
 		// 0: Training, 1: Cost, 2: Success rate
-		float m_LastTime;
+		float m_LastTime[3];
 
 
 	public:
@@ -58,7 +59,7 @@ namespace TNNT {
 		float CheckSuccessRate();
 		float CheckCost();
 
-		void Train(DataSet& data, HyperParameters& params);
+		void Train(DataSet* data, HyperParameters& params);
 
 
 

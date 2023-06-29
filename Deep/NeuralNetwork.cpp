@@ -765,15 +765,17 @@ namespace TNNT
 		const unsigned batchCount = num / batchSize;
 		const unsigned remainingBatch = num % batchSize;
 
-		std::mt19937 mt;
+		
 
-		unsigned* indicies = new unsigned[num];
+		unsigned* indices = new unsigned[num];
 		unsigned index = 0;
 		while (index < num)
 		{
-			indicies[index] = index;
+			indices[index] = index;
 			index++;
 		}
+
+		std::mt19937 mt;
 
 		unsigned epochCount = 0;
 		while (epochCount < epochs)
@@ -790,14 +792,14 @@ namespace TNNT
 
 					unsigned randomIndex = mt() % randomIndexCount;
 
-					unsigned epochRandomIndex = indicies[randomIndex];
-					indicies[randomIndex] = indicies[randomIndexCount - 1];
-					indicies[randomIndexCount - 1] = epochRandomIndex;
+					unsigned epochRandomIndex = indices[randomIndex];
+					indices[randomIndex] = indices[randomIndexCount - 1];
+					indices[randomIndexCount - 1] = epochRandomIndex;
 
 					unsigned inputIndex = 0;
 					while (inputIndex < m_LayerLayout[0])
 					{
-						inputBuffer[batchIndex * m_LayerLayout[0] + inputIndex] = traningInputs[epochRandomIndex * m_LayerLayout[0] + inputIndex];
+						inputBuffer[ m_LayerLayout[0] * batchIndex + inputIndex] = traningInputs[epochRandomIndex * m_LayerLayout[0] + inputIndex];
 						inputIndex++;
 					}
 
@@ -811,6 +813,7 @@ namespace TNNT
 
 
 					randomIndexCount--;
+
 					batchIndex++;
 				}
 
@@ -828,9 +831,9 @@ namespace TNNT
 
 					unsigned randomIndex = mt() % randomIndexCount;
 
-					unsigned epochRandomIndex = indicies[randomIndex];
-					indicies[randomIndex] = indicies[randomIndexCount - 1];
-					indicies[randomIndexCount - 1] = epochRandomIndex;
+					unsigned epochRandomIndex = indices[randomIndex];
+					indices[randomIndex] = indices[randomIndexCount - 1];
+					indices[randomIndexCount - 1] = epochRandomIndex;
 
 					unsigned inputIndex = 0;
 					while (inputIndex < m_LayerLayout[0])
@@ -861,7 +864,7 @@ namespace TNNT
 
 		delete[] inputBuffer;
 		delete[] outputBuffer;
-		delete[] indicies;
+		delete[] indices;
 	}
 
 	void NeuralNetwork::TrainWConditionMasterFunction(const float* traningInputs, const float* traningTargets, unsigned trainingNum,unsigned epochs, unsigned batchSize, float learningRate, float regConst, const float* checkInputs, const float* checkTargets, unsigned checkNum, ConditionFunctionPointer condFunc)
