@@ -19,8 +19,10 @@
 //Data-management
 #include <vector>
 
-//Optimization/multi-threading
+//Multi-threading
 #include <thread>
+#include <mutex>
+#include <shared_mutex>
 
 //User-made
 

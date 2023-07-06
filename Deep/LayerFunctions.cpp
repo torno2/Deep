@@ -17,14 +17,14 @@ namespace TNNT
 				while (prevIndex < n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes)
 				{
 					weightedSum +=
-						n->m_ABuffer[(n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer-1].Nodes) + prevIndex] *
+						n->m_A[(n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer-1].Nodes) + prevIndex] *
 						n->m_Weights[n->m_PositionData.Weights + n->m_LayerLayout[n->m_PositionData.Layer -1].Nodes * layerIndex + prevIndex];
 
 					prevIndex++;
 				}
 
-				n->m_ZBuffer[layerIndex + n->m_PositionData.Z] = weightedSum + n->m_Biases[layerIndex + n->m_PositionData.Biases];
-				n->m_ABuffer[layerIndex + n->m_PositionData.A] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(n->m_ZBuffer[layerIndex + n->m_PositionData.Z]);
+				n->m_Z[layerIndex + n->m_PositionData.Z] = weightedSum + n->m_Biases[layerIndex + n->m_PositionData.Biases];
+				n->m_A[layerIndex + n->m_PositionData.A] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(n->m_Z[layerIndex + n->m_PositionData.Z]);
 
 				layerIndex++;
 			}
@@ -55,7 +55,7 @@ namespace TNNT
 					latterLayerIndex++;
 				}
 
-				float dz = n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer - 1].f(n->m_ZBuffer[n->m_PositionData.Z + layerIndex]);
+				float dz = n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer - 1].f(n->m_Z[n->m_PositionData.Z + layerIndex]);
 				n->m_DeltaZ[n->m_PositionData.Z + layerIndex] = errorSum * dz;
 
 				layerIndex++;
@@ -82,7 +82,7 @@ namespace TNNT
 				unsigned prevLayerIndex = 0;
 				while (prevLayerIndex < n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes)
 				{
-					float a = n->m_ABuffer[prevAPos + prevLayerIndex];
+					float a = n->m_A[prevAPos + prevLayerIndex];
 					n->m_DeltaWeights[n->m_PositionData.Weights + n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes * layerIndex + prevLayerIndex] = a * dz;
 
 
@@ -149,7 +149,7 @@ namespace TNNT
 
 							weightedSum +=
 								n->m_Weights[n->m_PositionData.Weights + subLayerIndex * subLayerWeightsCount + height * receptiveWidth + width] *
-								n->m_ABuffer[prevLayerAPos + startA + height * imgWidth + width ];
+								n->m_A[prevLayerAPos + startA + height * imgWidth + width ];
 
 
 							width++;
@@ -157,7 +157,7 @@ namespace TNNT
 						height++;
 					}
 
-					n->m_ABuffer[n->m_PositionData.A + subLayerIndex + subLayer* subLayerCount] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(weightedSum + n->m_Biases[n->m_PositionData.Biases + subLayerIndex* subLayerBiasesCount]);
+					n->m_A[n->m_PositionData.A + subLayerIndex + subLayer* subLayerCount] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(weightedSum + n->m_Biases[n->m_PositionData.Biases + subLayerIndex* subLayerBiasesCount]);
 
 					subLayerIndex++;
 				}
@@ -254,7 +254,7 @@ namespace TNNT
 
 
 					
-					champ = n->m_ABuffer[prevLayerAPos + subLayer * prevSubLayerCount + startA];
+					champ = n->m_A[prevLayerAPos + subLayer * prevSubLayerCount + startA];
 
 					unsigned height = 0;
 					while (height < receptiveHeight)
@@ -263,7 +263,7 @@ namespace TNNT
 						while (width < receptiveWidth)
 						{
 								
-								check = n->m_ABuffer[prevLayerAPos+ subLayer* prevSubLayerCount + startA + width + height * imgWidth];
+								check = n->m_A[prevLayerAPos+ subLayer* prevSubLayerCount + startA + width + height * imgWidth];
 								if (check > champ)
 								{
 									champ = check;
@@ -275,8 +275,8 @@ namespace TNNT
 						height++;
 					}
 
-					n->m_ZBuffer[n->m_PositionData.Z + subLayerIndex + subLayer * subLayerCount] = champ;
-					n->m_ABuffer[n->m_PositionData.A + subLayerIndex + subLayer * subLayerCount] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer-1].f(champ);
+					n->m_Z[n->m_PositionData.Z + subLayerIndex + subLayer * subLayerCount] = champ;
+					n->m_A[n->m_PositionData.A + subLayerIndex + subLayer * subLayerCount] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer-1].f(champ);
 
 					subLayerIndex++;
 				}
@@ -330,11 +330,11 @@ namespace TNNT
 						while (width < receptiveWidth)
 						{	
 							//TODO: There is some funky shit that happens here when a z is observed in more than one receptive field
-							if (n->m_ABuffer[n->m_PositionData.A + subLayer * subLayerCount + startA + height*imgWidth + width] 
-								== n->m_ABuffer[latterLayerAPos + subLayer * latterSubLayerCount + subLayerIndex] )
+							if (n->m_A[n->m_PositionData.A + subLayer * subLayerCount + startA + height*imgWidth + width] 
+								== n->m_A[latterLayerAPos + subLayer * latterSubLayerCount + subLayerIndex] )
 							{
 								n->m_DeltaZ[n->m_PositionData.Z + subLayer * subLayerCount + startA + height * imgWidth + width] =
-									dz * n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer-1].f(n->m_ZBuffer[n->m_PositionData.Z]); // f(n->m_ZBuffer[n->m_PositionData.Z]) does this need to be fixed?
+									dz * n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer-1].f(n->m_Z[n->m_PositionData.Z]); // f(n->m_Z[n->m_PositionData.Z]) does this need to be fixed?
 							}
 							else {
 								n->m_DeltaZ[n->m_PositionData.Z + subLayer * subLayerCount + startA + height * imgWidth + width] = 0;
@@ -368,7 +368,7 @@ namespace TNNT
 		void CrossEntropy(NetworkPrototype* n)
 		{
 
-			unsigned startAPos = n->m_ABufferCount - n->m_LayerLayout[n->m_LayerLayoutCount - 1].Nodes;
+			unsigned startAPos = n->m_ACount - n->m_LayerLayout[n->m_LayerLayoutCount - 1].Nodes;
 
 
 
@@ -377,7 +377,7 @@ namespace TNNT
 			while (layerIndex < n->m_LayerLayout[n->m_LayerLayoutCount - 1].Nodes)
 			{
 				
-				float a = n->m_ABuffer[startAPos + layerIndex];
+				float a = n->m_A[startAPos + layerIndex];
 				float y = n->m_TargetBuffer[layerIndex];
 
 				float cost = Math::CrossEntropy(a, y);
@@ -397,8 +397,8 @@ namespace TNNT
 			while (layerIndex < n->m_LayerLayout[n->m_PositionData.Layer].Nodes)
 			{
 				//Right here we need the a from this layer, and we therfore have to add the length of the previous layer to get to the start of this one.
-				float z = n->m_ZBuffer[n->m_PositionData.Z + layerIndex];
-				float a = n->m_ABuffer[n->m_PositionData.A + layerIndex];
+				float z = n->m_Z[n->m_PositionData.Z + layerIndex];
+				float a = n->m_A[n->m_PositionData.A + layerIndex];
 				float y = n->m_TargetBuffer[layerIndex];
 
 				float dz = Math::CrossEntropyCostDerivative(z, a, y);

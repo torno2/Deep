@@ -103,10 +103,9 @@ namespace TNNT
 
 
 		m_TargetBuffer = new float[m_LayerLayout[m_LayerLayoutCount - 1].Nodes];
+
 		m_CostBuffer = new float[m_SlaveThreadCount];
 		m_GuessBuffer = new unsigned[m_SlaveThreadCount];
-
-
 
 		m_SlaveThreads = new std::thread[m_SlaveThreadCount];
 		m_Locks = new bool[m_SlaveThreadCount * 2];
@@ -193,11 +192,9 @@ namespace TNNT
 		delete[] m_WeightsBuffer;
 
 		delete[] m_TargetBuffer;
+
 		delete[] m_CostBuffer;
 		delete[] m_GuessBuffer;
-
-		delete[] m_InternalInputBuffer;
-		delete[] m_InternalTargetBuffer;
 
 
 		delete[] m_SlaveThreads;
@@ -234,11 +231,19 @@ namespace TNNT
 		unsigned localStop = 0;
 		ThreadWorkloadDivider(localOffset, localStop, m_BiasesCount, thread);
 
+		
+		
 
 		unsigned index = localOffset;
 		while (index < localStop)
 		{
+			
+			
+
 			m_BiasesBuffer[index] =  m_Biases[index];
+
+			
+
 			index++;
 		}
 	}
@@ -249,11 +254,17 @@ namespace TNNT
 		unsigned localStop = 0;
 		ThreadWorkloadDivider(localOffset, localStop, m_WeightsCount, thread);
 
+		
 
 		unsigned index = localOffset;
 		while (index < localStop)
 		{
+			
+
 			m_WeightsBuffer[index] = m_Weights[index];
+
+			
+
 			index++;
 		}
 	}
@@ -270,26 +281,32 @@ namespace TNNT
 		unsigned localStop = 0;
 		ThreadWorkloadDivider(localOffset, localStop, m_BiasesCount, thread);
 
+		
 
 		unsigned index = localOffset;
 		while (index < localStop)
 		{
+			
 			m_Biases[index] = m_BiasesBuffer[index];
+			
 			index++;
 		}
 	}
 
 	void NetworkPrototypeMT::SetWeightsToTemp(unsigned thread)
 	{
-				unsigned localOffset = 0;
+		unsigned localOffset = 0;
 		unsigned localStop = 0;
 		ThreadWorkloadDivider(localOffset, localStop, m_WeightsCount, thread);
 
+		
 
 		unsigned index = localOffset;
 		while (index < localStop)
 		{
+			
 			m_Weights[index] = m_WeightsBuffer[index];
+			
 			index++;
 		}
 	}
@@ -323,23 +340,25 @@ namespace TNNT
 		unsigned start;
 		unsigned stop;
 		ThreadWorkloadDivider(start, stop, m_Data->TrainingCount, thread);
+
+		
+
 		unsigned index = start;
 		while (index < stop)
 		{
+			
 			m_Indices[index] = index;
+			
 			index++;
 		}
 	}
 
 	void NetworkPrototypeMT::SetHyperParameters(HyperParameters& params)
 	{
-		delete[] m_InternalInputBuffer;
-		delete[] m_InternalTargetBuffer;
+
 
 		m_HyperParameters = params;
 
-		m_InternalInputBuffer = new float[m_HyperParameters.BatchCount * m_LayerLayout[0].Nodes];
-		m_InternalTargetBuffer = new float[m_HyperParameters.BatchCount * m_LayerLayout[m_LayerLayoutCount - 1].Nodes];
 	}
 
 	void NetworkPrototypeMT::SetInput(float* input, unsigned thread)
@@ -348,10 +367,14 @@ namespace TNNT
 		unsigned stop;
 		ThreadWorkloadDivider(start, stop, m_LayerLayout[0].Nodes, thread);
 
+		
+
 		unsigned index = start;
 		while (index < stop)
 		{
+			
 			m_ABuffer[index] = input[index];
+			
 			index++;
 		}
 	}
@@ -362,10 +385,14 @@ namespace TNNT
 		unsigned stop;
 		ThreadWorkloadDivider(start, stop, m_LayerLayout[m_LayerLayoutCount - 1].Nodes, thread);
 
+		
+
 		unsigned index = start;
 		while (index < stop)
 		{
+			
 			m_TargetBuffer[index] = target[index];
+			
 			index++;
 		}
 	}
@@ -552,47 +579,25 @@ namespace TNNT
 		SpinLock(thread);
 	}
 
-	void NetworkPrototypeMT::SamplePrepp(unsigned batchCount, unsigned step, unsigned thread)
-	{
-		unsigned start;
-		unsigned stop;
 
-
-		ThreadWorkloadDivider(start, stop, m_LayerLayout[0].Nodes * batchCount, thread);
-
-
-		unsigned inputIndex = start;
-		while (inputIndex < stop)
-		{
-			unsigned indiciesPos = inputIndex / m_LayerLayout[0].Nodes + step * batchCount;
-			m_InternalInputBuffer[inputIndex] = m_Data->TrainingInputs[m_Indices[indiciesPos] * m_LayerLayout[0].Nodes + inputIndex % m_LayerLayout[0].Nodes];
-			inputIndex++;
-
-		}
-
-		ThreadWorkloadDivider(start, stop, m_LayerLayout[m_LayerLayoutCount - 1].Nodes * batchCount, thread);
-
-		unsigned targetIndex = start;
-		while (targetIndex < stop)
-		{
-			unsigned indiciesPos = targetIndex / m_LayerLayout[m_LayerLayoutCount - 1].Nodes + step * batchCount;
-			m_InternalTargetBuffer[targetIndex] = m_Data->TraningTargets[m_Indices[indiciesPos] * m_LayerLayout[m_LayerLayoutCount - 1].Nodes + targetIndex % m_LayerLayout[m_LayerLayoutCount - 1].Nodes];
-			targetIndex++;
-		}
-	}
-
-	void NetworkPrototypeMT::TrainOnSet(unsigned batchCount, unsigned thread)
+	void NetworkPrototypeMT::TrainOnSet(unsigned batchCount, unsigned batch, unsigned thread)
 	{
 		SpinLock(thread);
 		m_Functions.RegularizationFunction.f(this,thread);
 		
+		
+		
 
 		unsigned exampleIndex = 0;
-		while (exampleIndex < m_HyperParameters.BatchCount)
+		while (exampleIndex < batchCount)
 		{
 
-			SetInput(&(m_InternalInputBuffer[exampleIndex * m_LayerLayout[0].Nodes]),thread);
-			SetTarget(&(m_InternalTargetBuffer[exampleIndex * m_LayerLayout[m_LayerLayoutCount - 1].Nodes]),thread);
+
+			
+			unsigned indedx = m_Indices[exampleIndex + batch * m_HyperParameters.BatchCount];
+			SetInput(&(m_Data->TrainingInputs[indedx * m_LayerLayout[0].Nodes]), thread);
+			SetTarget(&(m_Data->TraningTargets[indedx * m_LayerLayout[m_LayerLayoutCount - 1].Nodes]), thread);
+			
 			SpinLock(thread);
 
 			FeedForward(thread);
@@ -630,8 +635,7 @@ namespace TNNT
 			{
 				position++;
 				SlaveControlStation(position);
-				SamplePrepp(m_HyperParameters.BatchCount, batch, thread);
-				TrainOnSet(m_HyperParameters.BatchCount, thread);
+				TrainOnSet(m_HyperParameters.BatchCount, batch, thread);
 
 				batch++;
 			}
@@ -641,9 +645,7 @@ namespace TNNT
 			{
 				position++;
 				SlaveControlStation(position);
-
-				SamplePrepp(remainingBatchCount, batch, thread);
-				TrainOnSet(remainingBatchCount, thread);
+				TrainOnSet(remainingBatchCount, batch , thread);
 			}
 
 			epoch++;
@@ -658,7 +660,7 @@ namespace TNNT
 
 		m_MasterControlPoint = 0;
 
-
+		
 
 
 		const unsigned batchNum = m_Data->TrainingCount / m_HyperParameters.BatchCount;
@@ -669,6 +671,7 @@ namespace TNNT
 		unsigned epochNum = 0;
 		while (epochNum < m_HyperParameters.Epochs)
 		{
+			unsigned randomIndexPos = 0;
 			unsigned randomIndexCount = m_Data->TrainingCount;
 
 
@@ -679,12 +682,13 @@ namespace TNNT
 				while (batchIndex < m_HyperParameters.BatchCount)
 				{
 
-					unsigned randomIndex = mt() % randomIndexCount;
-
+					unsigned randomIndex = (mt() % randomIndexCount) + randomIndexPos;
+					
 					unsigned epochRandomIndex = m_Indices[randomIndex];
-					m_Indices[randomIndex] = m_Indices[randomIndexCount - 1];
-					m_Indices[randomIndexCount - 1] = epochRandomIndex;
-
+					m_Indices[randomIndex] = m_Indices[randomIndexPos];
+					m_Indices[randomIndexPos] = epochRandomIndex;
+					
+					randomIndexPos++;
 					randomIndexCount--;
 					
 					batchIndex++;
@@ -701,16 +705,16 @@ namespace TNNT
 				while (batchIndex < remainingBatch)
 				{
 
-					unsigned randomIndex = mt() % randomIndexCount;
-
+					unsigned randomIndex = (mt() % randomIndexCount) + randomIndexPos;
+					
 					unsigned epochRandomIndex = m_Indices[randomIndex];
-					m_Indices[randomIndex] = m_Indices[randomIndexCount - 1];
-					m_Indices[randomIndexCount - 1] = epochRandomIndex;
+					m_Indices[randomIndex] = m_Indices[randomIndexPos];
+					m_Indices[randomIndexPos] = epochRandomIndex;
+					
 
 
 
-
-
+					randomIndexPos++;
 					randomIndexCount--;
 					batchIndex++;
 
@@ -768,6 +772,7 @@ namespace TNNT
 		auto start = std::chrono::high_resolution_clock::now();
 
 		float cost = 0;
+		
 
 		unsigned thread = 0;
 		while (thread < m_SlaveThreadCount)
@@ -786,23 +791,21 @@ namespace TNNT
 			thread++;
 		}
 
-		cost = cost / ((float)m_Data->TestCount);
-		
-
-
 
 		auto stop = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<float>  time = stop - start;
 		m_LastTime[1] = time.count();
 
 
-		return cost;
+		return  cost / ((float)m_Data->TestCount);
 
 	}
 
 	void NetworkPrototypeMT::CheckSuccessRateSlaveFunction(unsigned thread)
 	{
 		const unsigned Ap = m_ABufferCount - m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
+
+		
 
 		unsigned checkIndex = 0;
 		while (checkIndex < m_Data->TestCount)
@@ -833,7 +836,9 @@ namespace TNNT
 			}
 			if (championItterator != -1)
 			{
+				
 				m_GuessBuffer[thread] = championItterator;
+				
 			}
 			
 			m_SlaveFlags[thread] = true;

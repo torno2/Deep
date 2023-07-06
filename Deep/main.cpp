@@ -17,7 +17,7 @@ int main() {
 
 
 #define testStop 1
-#define threadN 1
+#define threadN 10
 
 
 #if 2<3
@@ -126,7 +126,7 @@ int main() {
 			pLayout[0].Biases = 0;
 			pLayout[0].Weights = 0;
 
-			pLayout[1].Nodes = 10;
+			pLayout[1].Nodes = 30;
 			pLayout[1].Biases = pLayout[1].Nodes;
 			pLayout[1].Weights = pLayout[1].Nodes * pLayout[0].Nodes;
 
@@ -295,15 +295,16 @@ int main() {
 
 
 #if 2<3
+#if testStop > 2
 		pr("Old: ");
 		{
 			//Training start
 			t.Start();
 
-	#if testStop > 0
+
 			nOld.Train(data, params);
 			pr("Train time: " << t.Stop() << "s");
-	#endif
+	
 			//Traning End
 
 
@@ -317,17 +318,17 @@ int main() {
 
 			//Check Stop
 		}
-
-		
+#endif
+#if testStop > 2
 		pr("OldMT: ");
 		{
 			//Training start
 			t.Start();
-	#if testStop > 0
+
 			nOldMT.Train(data, params);
 
 			pr("Train time: " << t.Stop() << "s");
-	#endif
+
 			//Traning End
 
 
@@ -341,7 +342,7 @@ int main() {
 
 			//Check Stop
 		}
-
+#endif
 
 
 		pr("New");
@@ -397,7 +398,7 @@ int main() {
 
 #endif
 		
-#if 2<3
+#if 2>3
 		unsigned i = 0;
 		while (i < data.TrainingCount)
 		{

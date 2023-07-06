@@ -10,41 +10,43 @@ namespace TNNT
 	{
 
 	public:
+		//Order A, Weights, Biases, Z, dZ, dWeights, dBiases, WeightsBuffer, BiasesBuffer 
+		float* m_NetworkFixedData;
 
 		LayerLayout* m_LayerLayout;
 		unsigned m_LayerLayoutCount;
 
 		FunctionsLayoutMT m_Functions;
 
+		float* m_ABuffer;
+		unsigned m_ABufferCount;
+
+
 		float* m_ZBuffer;
 		float* m_DeltaZ;
 		unsigned m_ZBufferCount;
 
 
-		float* m_ABuffer;
-		unsigned m_ABufferCount;
-
-
-		float* m_Biases;
-		float* m_DeltaBiases;
-		float* m_BiasesBuffer;
-		unsigned m_BiasesCount;
-
+		float* m_TargetBuffer;
 
 		float* m_Weights;
-		float* m_DeltaWeights;
-		float* m_WeightsBuffer;
-		unsigned m_WeightsCount;
+		float* m_Biases;
 
-		float* m_TargetBuffer;
+		float* m_DeltaWeights;
+		float* m_DeltaBiases;
+
+		float* m_WeightsBuffer;
+		float* m_BiasesBuffer;
+
+		unsigned m_WeightsCount;
+		unsigned m_BiasesCount;
+
 		float* m_CostBuffer;
 		unsigned* m_GuessBuffer;
 
 		//Note to self: Handling m_PositionData with multiple threads is tricky. Current fix is having thread 0 take care of it.
 		PositionData m_PositionData;
 		unsigned* m_Indices = nullptr;
-		float* m_InternalInputBuffer = nullptr;
-		float* m_InternalTargetBuffer = nullptr;
 
 		//Temporary ownership. The network is not responsible for this pointer.
 		DataSet* m_Data;
@@ -64,6 +66,9 @@ namespace TNNT
 		bool* m_Locks;
 		bool* m_SlaveFlags;
 		unsigned m_MasterControlPoint = 0;
+
+
+		
 
 		
 
@@ -114,8 +119,7 @@ namespace TNNT
 		void FeedForward(unsigned thread);
 		void Backpropegate(unsigned thread);
 
-		void SamplePrepp(unsigned batchCount, unsigned step, unsigned thread);
-		void TrainOnSet(unsigned batchCount, unsigned thread);
+		void TrainOnSet(unsigned batchCount, unsigned batch, unsigned thread);
 
 		void TrainSlaveFunction(unsigned thread);
 		void TrainMasterFunction();

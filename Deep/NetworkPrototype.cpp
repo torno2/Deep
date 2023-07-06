@@ -80,30 +80,36 @@ namespace TNNT
 
 			layoutIndex++;
 		}
+
 		//No Zs for the 0th layer;
-		m_ZBufferCount = nodesTotal - m_LayerLayout[0].Nodes;
-		m_ABufferCount = nodesTotal;
+		m_ZCount = nodesTotal - m_LayerLayout[0].Nodes;
+		m_ACount = nodesTotal;
 		m_BiasesCount = biasTotal;
 		m_WeightsCount = weightTotal;
+
+		m_InputBufferCount = m_LayerLayout[0].Nodes;
+		m_TargetBufferCount = m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
+
 		
+		//Order: A, Weights, Biases, Z, dZ, dWeights, dBiases, WeightsBuffer, BiasesBuffer, Target
+		m_NetworkFixedData = new float[m_ACount + 3 * m_WeightsCount + 3 * m_BiasesCount + 2 * m_ZCount + m_TargetBufferCount];
 
-		m_ZBuffer = new float[m_ZBufferCount];
-		m_DeltaZ = new float[m_ZBufferCount];
+		m_A = m_NetworkFixedData;
+		m_InputBuffer = m_A;
 
-		m_ABuffer = new float[m_ABufferCount];
+		m_Weights = &m_NetworkFixedData[m_ACount];
+		m_Biases = &m_NetworkFixedData[m_ACount + m_WeightsCount];
 
-		m_Biases = new float[m_BiasesCount];
-		m_DeltaBiases = new float[m_BiasesCount];
-		m_BiasesBuffer = new float[m_BiasesCount];
+		m_Z = &m_NetworkFixedData[m_ACount + m_WeightsCount + m_BiasesCount];
+		m_DeltaZ = &m_NetworkFixedData[m_ACount + m_WeightsCount + m_BiasesCount + m_ZCount];
 
+		m_DeltaWeights = &m_NetworkFixedData[m_ACount + m_WeightsCount + m_BiasesCount + 2 * m_ZCount];
+		m_DeltaBiases = &m_NetworkFixedData[m_ACount + 2 * m_WeightsCount + m_BiasesCount + 2 * m_ZCount];
 
-		m_Weights = new float[weightTotal];
-		m_DeltaWeights = new float[weightTotal];
-		m_WeightsBuffer = new float[weightTotal];
+		m_WeightsBuffer = &m_NetworkFixedData[m_ACount + 2 * m_WeightsCount + 2 * m_BiasesCount + 2 * m_ZCount];
+		m_BiasesBuffer = &m_NetworkFixedData[m_ACount + 3 * m_WeightsCount + 2 * m_BiasesCount + 2 * m_ZCount];
 		
-
-		m_TargetBuffer = new float[m_LayerLayout[m_LayerLayoutCount - 1].Nodes];
-
+		m_TargetBuffer = &m_NetworkFixedData[m_ACount + 3 * m_WeightsCount + 3 * m_BiasesCount + 2 * m_ZCount];
 
 
 
@@ -151,28 +157,7 @@ namespace TNNT
 	{
 		delete[] m_LayerLayout;
 
-		delete[] m_ZBuffer;
-		delete[] m_DeltaZ;
-
-		delete[] m_ABuffer;
-
-		delete[] m_Biases;
-		delete[] m_DeltaBiases;
-		delete[] m_BiasesBuffer;
-
-		delete[] m_Weights;
-		delete[] m_DeltaWeights;
-		delete[] m_WeightsBuffer;
-
-		delete[] m_TargetBuffer;
-
-
-		delete[] m_InternalInputBuffer;
-		delete[] m_InternalTargetBuffer;
-
-
-
-		
+		delete[] m_NetworkFixedData;
 
 	}
 
@@ -275,15 +260,8 @@ void NetworkPrototype::SetWeightsToTemp()
 
 	void NetworkPrototype::SetHyperParameters(HyperParameters& params)
 	{
-		
-		delete[] m_InternalInputBuffer;
-		delete[] m_InternalTargetBuffer;
 
 		m_HyperParameters = params;
-
-		
-		m_InternalInputBuffer = new float[m_HyperParameters.BatchCount * m_LayerLayout[0].Nodes];
-		m_InternalTargetBuffer = new float[m_HyperParameters.BatchCount * m_LayerLayout[m_LayerLayoutCount-1].Nodes];
 
 
 	}
@@ -293,9 +271,9 @@ void NetworkPrototype::SetWeightsToTemp()
 	{
 
 		unsigned index = 0;
-		while (index < m_LayerLayout[0].Nodes)
+		while (index < m_InputBufferCount)
 		{
-			m_ABuffer[index] = input[index];
+			m_InputBuffer[index] = input[index];
 			index++;
 		}
 	}
@@ -309,7 +287,7 @@ void NetworkPrototype::SetWeightsToTemp()
 
 
 		unsigned index = 0;
-		while (index < m_LayerLayout[m_LayerLayoutCount - 1].Nodes)
+		while (index < m_TargetBufferCount)
 		{
 			m_TargetBuffer[index] = target[index];
 			index++;
@@ -369,8 +347,8 @@ void NetworkPrototype::SetWeightsToTemp()
 		{
 			m_PositionData.Layer = lastLayer;
 
-			m_PositionData.Z = m_ZBufferCount - m_LayerLayout[lastLayer].Nodes;
-			m_PositionData.A = m_ABufferCount - m_LayerLayout[lastLayer].Nodes;
+			m_PositionData.Z = m_ZCount - m_LayerLayout[lastLayer].Nodes;
+			m_PositionData.A = m_ACount - m_LayerLayout[lastLayer].Nodes;
 
 			m_PositionData.Biases = m_BiasesCount - m_LayerLayout[lastLayer].Biases;
 			m_PositionData.Weights = m_WeightsCount - m_LayerLayout[lastLayer].Weights;
@@ -419,18 +397,20 @@ void NetworkPrototype::SetWeightsToTemp()
 
 
 
-	void NetworkPrototype::TrainOnSet(unsigned num)
+	void NetworkPrototype::TrainOnSet(unsigned batchCount , unsigned batch)
 	{
 
 		m_Functions.RegularizationFunction.f(this);
 
+	
 
-		unsigned exampleIndex = 0;
-		while (exampleIndex < m_HyperParameters.BatchCount)
+		unsigned exampleIndex =0;
+		while (exampleIndex < batchCount)
 		{
 
-			SetInput(&(m_InternalInputBuffer[exampleIndex * m_LayerLayout[0].Nodes]));
-			SetTarget(&(m_InternalTargetBuffer[exampleIndex * m_LayerLayout[m_LayerLayoutCount - 1].Nodes]));
+			unsigned indedx = m_Indices[exampleIndex + batch * m_HyperParameters.BatchCount];
+			SetInput(&(m_Data->TrainingInputs[indedx * m_InputBufferCount]));
+			SetTarget(&(m_Data->TraningTargets[indedx * m_TargetBufferCount]));
 
 
 			FeedForward();
@@ -469,6 +449,8 @@ void NetworkPrototype::SetWeightsToTemp()
 		unsigned epochNum = 0;
 		while (epochNum < m_HyperParameters.Epochs)
 		{
+			
+			unsigned randomIndexPos = 0;
 			unsigned randomIndexCount = m_Data->TrainingCount;
 
 
@@ -479,34 +461,19 @@ void NetworkPrototype::SetWeightsToTemp()
 				while (batchIndex < m_HyperParameters.BatchCount)
 				{
 
-					unsigned randomIndex = mt() % randomIndexCount;
+					unsigned randomIndex = (mt() % randomIndexCount)+ randomIndexPos;
 
 					unsigned epochRandomIndex = m_Indices[randomIndex];
-					m_Indices[randomIndex] = m_Indices[randomIndexCount - 1];
-					m_Indices[randomIndexCount - 1] = epochRandomIndex;
+					m_Indices[randomIndex] = m_Indices[randomIndexPos];
+					m_Indices[randomIndexPos] = epochRandomIndex;
 
-					unsigned inputIndex = 0;
-					while (inputIndex < m_LayerLayout[0].Nodes)
-					{
-						m_InternalInputBuffer[batchIndex * m_LayerLayout[0].Nodes + inputIndex] = m_Data->TrainingInputs[epochRandomIndex * m_LayerLayout[0].Nodes + inputIndex];
-						inputIndex++;
-					}
-
-					unsigned outputIndex = 0;
-					while (outputIndex < m_LayerLayout[m_LayerLayoutCount - 1].Nodes)
-					{
-						m_InternalTargetBuffer[m_LayerLayout[m_LayerLayoutCount - 1].Nodes * batchIndex + outputIndex] = m_Data->TraningTargets[m_LayerLayout[m_LayerLayoutCount - 1].Nodes * epochRandomIndex + outputIndex];
-						outputIndex++;
-					}
-
-
-
+					randomIndexPos++;
 					randomIndexCount--;
 
 					batchIndex++;
 				}
 
-				TrainOnSet(m_HyperParameters.BatchCount);
+				TrainOnSet(m_HyperParameters.BatchCount, batch);
 
 				batch++;
 			}
@@ -518,33 +485,21 @@ void NetworkPrototype::SetWeightsToTemp()
 				while (batchIndex < remainingBatch)
 				{
 
-					unsigned randomIndex = mt() % randomIndexCount;
+
+					unsigned randomIndex = (mt() % randomIndexCount) + randomIndexPos;
 
 					unsigned epochRandomIndex = m_Indices[randomIndex];
-					m_Indices[randomIndex] = m_Indices[randomIndexCount - 1];
-					m_Indices[randomIndexCount - 1] = epochRandomIndex;
-
-					unsigned inputIndex = 0;
-					while (inputIndex < m_LayerLayout[0].Nodes)
-					{
-						m_InternalInputBuffer[batchIndex * m_LayerLayout[0].Nodes + inputIndex] = m_Data->TrainingInputs[epochRandomIndex * m_LayerLayout[0].Nodes + inputIndex];
-						inputIndex++;
-					}
-
-					unsigned outputIndex = 0;
-					while (outputIndex < m_LayerLayout[m_LayerLayoutCount - 1].Nodes)
-					{
-						m_InternalTargetBuffer[m_LayerLayout[m_LayerLayoutCount - 1].Nodes * batchIndex + outputIndex] = m_Data->TraningTargets[m_LayerLayout[m_LayerLayoutCount - 1].Nodes * epochRandomIndex + outputIndex];
-						outputIndex++;
-					}
+					m_Indices[randomIndex] = m_Indices[randomIndexPos];
+					m_Indices[randomIndexPos] = epochRandomIndex;
 
 
 
+					randomIndexPos++;
 					randomIndexCount--;
 					batchIndex++;
 
 				}
-				TrainOnSet(remainingBatch);
+				TrainOnSet(remainingBatch, batch);
 			}
 
 
@@ -571,8 +526,8 @@ void NetworkPrototype::SetWeightsToTemp()
 		while (checkIndex < m_Data->TestCount)
 		{
 
-			SetInput(&m_Data->TestInputs[checkIndex * m_LayerLayout[0].Nodes]);
-			SetTarget(&m_Data->TestTargets[checkIndex * m_LayerLayout[m_LayerLayoutCount - 1].Nodes]);
+			SetInput(&m_Data->TestInputs[checkIndex * m_InputBufferCount]);
+			SetTarget(&m_Data->TestTargets[checkIndex * m_TargetBufferCount]);
 			
 			
 			FeedForward();
@@ -598,7 +553,7 @@ void NetworkPrototype::SetWeightsToTemp()
 	{
 		auto start = std::chrono::high_resolution_clock::now();
 
-		const unsigned Ap = m_ABufferCount - m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
+		const unsigned Ap = m_ACount - m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
 
 		float score = 0.0f;
 
@@ -606,7 +561,7 @@ void NetworkPrototype::SetWeightsToTemp()
 		while (checkIndex < m_Data->TestCount)
 		{
 
-			SetInput(&m_Data->TestInputs[checkIndex * m_LayerLayout[0].Nodes]);
+			SetInput(&m_Data->TestInputs[checkIndex * m_InputBufferCount]);
 			FeedForward();
 
 			int championItterator = -1;
@@ -615,9 +570,9 @@ void NetworkPrototype::SetWeightsToTemp()
 			while (outputIndex < m_LayerLayout[m_LayerLayoutCount - 1].Nodes)
 			{
 				
-				if (m_ABuffer[Ap + outputIndex] >= champion)
+				if (m_A[Ap + outputIndex] >= champion)
 				{
-					champion = m_ABuffer[Ap + outputIndex];
+					champion = m_A[Ap + outputIndex];
 					championItterator = outputIndex;
 				}
 
@@ -625,7 +580,7 @@ void NetworkPrototype::SetWeightsToTemp()
 				outputIndex++;
 			}
 
-			if (m_Data->TestTargets[m_LayerLayout[m_LayerLayoutCount - 1].Nodes * checkIndex + championItterator] == 1)
+			if (m_Data->TestTargets[m_TargetBufferCount * checkIndex + championItterator] == 1)
 			{
 				score += 1.0f;
 			}

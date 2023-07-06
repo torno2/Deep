@@ -1,11 +1,15 @@
 #pragma once
 #include "NeuralNetworkCustomVariables.h"
 
+
+
 namespace TNNT {
 
 	class NetworkPrototype
 	{
 	public:
+		//Order: A, Weights, Biases, Z, dZ, dWeights, dBiases, WeightsBuffer, BiasesBuffer 
+		float* m_NetworkFixedData;
 
 		FunctionsLayout m_Functions;
 
@@ -14,38 +18,45 @@ namespace TNNT {
 		LayerLayout* m_LayerLayout;
 		unsigned m_LayerLayoutCount;
 
-		float* m_ZBuffer;
+
+		float* m_A;
+		unsigned m_ACount;
+
+
+		float* m_Z;
 		float* m_DeltaZ;
-		unsigned m_ZBufferCount;
+		unsigned m_ZCount;
 
 
-		float* m_ABuffer;
-		unsigned m_ABufferCount;
-
-
-		float* m_Biases;
-		float* m_DeltaBiases;
-		float* m_BiasesBuffer;
-		unsigned m_BiasesCount;
-
-
-		float* m_Weights;
-		float* m_DeltaWeights;
-		float* m_WeightsBuffer;
-		unsigned m_WeightsCount;
+		float* m_InputBuffer;
+		unsigned m_InputBufferCount;
 
 		float* m_TargetBuffer;
+		unsigned m_TargetBufferCount;
+		
+
+		float* m_Weights;
+		float* m_Biases;
+
+		float* m_DeltaWeights;
+		float* m_DeltaBiases;
+
+		float* m_WeightsBuffer;
+		float* m_BiasesBuffer;
+		
+		unsigned m_WeightsCount;
+		unsigned m_BiasesCount;
+
+		
 		float m_CostBuffer;
 		
 		
 		HyperParameters m_HyperParameters;
 		
 		unsigned* m_Indices = nullptr;
-		float* m_InternalInputBuffer = nullptr;
-		float* m_InternalTargetBuffer = nullptr;
 		
 		
-		DataSet* m_Data;
+		DataSet* m_Data = nullptr;
 
 		// 0: Training, 1: Cost, 2: Success rate
 		float m_LastTime[3];
@@ -87,7 +98,7 @@ namespace TNNT {
 		void FeedForward();
 		void Backpropegate();
 
-		void TrainOnSet(unsigned num);
+		void TrainOnSet(unsigned batchCount, unsigned batch);
 
 		void TrainMasterFunction();
 		
