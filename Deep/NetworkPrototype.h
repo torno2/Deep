@@ -1,6 +1,6 @@
 #pragma once
 #include "NeuralNetworkCustomVariables.h"
-
+#include "LayerLayout.h"
 
 
 namespace TNNT {
@@ -8,6 +8,7 @@ namespace TNNT {
 	class NetworkPrototype
 	{
 	public:
+
 		//Order: A, Weights, Biases, Z, dZ, dWeights, dBiases, WeightsBuffer, BiasesBuffer 
 		float* m_NetworkFixedData;
 
@@ -31,8 +32,9 @@ namespace TNNT {
 		float* m_InputBuffer;
 		unsigned m_InputBufferCount;
 
+		float* m_OutputBuffer;
 		float* m_TargetBuffer;
-		unsigned m_TargetBufferCount;
+		unsigned m_OutputBufferCount;
 		
 
 		float* m_Weights;
@@ -72,7 +74,7 @@ namespace TNNT {
 
 		void Train(DataSet* data, HyperParameters& params);
 
-
+		unsigned Check(float* input);
 
 
 
@@ -97,6 +99,9 @@ namespace TNNT {
 
 		void FeedForward();
 		void Backpropegate();
+	
+		void Regularization();
+		void Train();
 
 		void TrainOnSet(unsigned batchCount, unsigned batch);
 
@@ -106,6 +111,7 @@ namespace TNNT {
 
 		float CheckCostMasterFunction();
 		float CheckSuccessRateMasterFunction();
+		unsigned CheckMasterFunction(float* input);
 
 
 

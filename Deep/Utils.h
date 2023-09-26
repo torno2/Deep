@@ -27,7 +27,7 @@ void PArr(T* arr, unsigned count)
 }
 
 
-struct std::chrono::steady_clock::time_point;
+class std::chrono::steady_clock::time_point;
 struct Timer
 {
 private:
@@ -36,3 +36,5 @@ public:
 	void Start();
 	float Stop();
 };
+
+void PrintImg(float* img, unsigned width, unsigned height);

@@ -80,29 +80,36 @@ namespace TNNT
 
 			layoutIndex++;
 		}
-		//No Zs for the 0th layer;
-		m_ZBufferCount = nodesTotal - m_LayerLayout[0].Nodes;
-		m_ABufferCount = nodesTotal;
+		m_ZCount = nodesTotal - m_LayerLayout[0].Nodes;
+		m_ACount = nodesTotal;
 		m_BiasesCount = biasTotal;
 		m_WeightsCount = weightTotal;
 
-
-		m_ZBuffer = new float[m_ZBufferCount];
-		m_DeltaZ = new float[m_ZBufferCount];
-
-		m_ABuffer = new float[m_ABufferCount];
-
-		m_Biases = new float[m_BiasesCount];
-		m_DeltaBiases = new float[m_BiasesCount];
-		m_BiasesBuffer = new float[m_BiasesCount];
+		m_InputBufferCount = m_LayerLayout[0].Nodes;
+		m_OutputBufferCount = m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
 
 
-		m_Weights = new float[weightTotal];
-		m_DeltaWeights = new float[weightTotal];
-		m_WeightsBuffer = new float[weightTotal];
+		//Order: A, Weights, Biases, Z, dZ, dWeights, dBiases, WeightsBuffer, BiasesBuffer, Target
+		m_NetworkFixedData = new float[m_ACount + 3 * m_WeightsCount + 3 * m_BiasesCount + 2 * m_ZCount + m_OutputBufferCount];
 
+		m_A = m_NetworkFixedData;
+		m_InputBuffer = m_A;
+		m_OutputBuffer = &m_A[m_ACount - m_OutputBufferCount];
 
-		m_TargetBuffer = new float[m_LayerLayout[m_LayerLayoutCount - 1].Nodes];
+		m_Weights = &m_NetworkFixedData[m_ACount];
+		m_Biases = &m_NetworkFixedData[m_ACount + m_WeightsCount];
+
+		m_Z = &m_NetworkFixedData[m_ACount + m_WeightsCount + m_BiasesCount];
+		m_DeltaZ = &m_NetworkFixedData[m_ACount + m_WeightsCount + m_BiasesCount + m_ZCount];
+
+		m_DeltaWeights = &m_NetworkFixedData[m_ACount + m_WeightsCount + m_BiasesCount + 2 * m_ZCount];
+		m_DeltaBiases = &m_NetworkFixedData[m_ACount + 2 * m_WeightsCount + m_BiasesCount + 2 * m_ZCount];
+
+		m_WeightsBuffer = &m_NetworkFixedData[m_ACount + 2 * m_WeightsCount + 2 * m_BiasesCount + 2 * m_ZCount];
+		m_BiasesBuffer = &m_NetworkFixedData[m_ACount + 3 * m_WeightsCount + 2 * m_BiasesCount + 2 * m_ZCount];
+
+		m_TargetBuffer = &m_NetworkFixedData[m_ACount + 3 * m_WeightsCount + 3 * m_BiasesCount + 2 * m_ZCount];
+
 
 		m_CostBuffer = new float[m_SlaveThreadCount];
 		m_GuessBuffer = new unsigned[m_SlaveThreadCount];
@@ -178,20 +185,7 @@ namespace TNNT
 
 		delete[] m_LayerLayout;
 
-		delete[] m_ZBuffer;
-		delete[] m_DeltaZ;
-
-		delete[] m_ABuffer;
-
-		delete[] m_Biases;
-		delete[] m_DeltaBiases;
-		delete[] m_BiasesBuffer;
-
-		delete[] m_Weights;
-		delete[] m_DeltaWeights;
-		delete[] m_WeightsBuffer;
-
-		delete[] m_TargetBuffer;
+		delete[] m_NetworkFixedData;
 
 		delete[] m_CostBuffer;
 		delete[] m_GuessBuffer;
@@ -219,6 +213,11 @@ namespace TNNT
 		SetHyperParameters(params);
 		TrainMasterFunction();
 
+	}
+
+	unsigned NetworkPrototypeMT::Check(float* input)
+	{
+		return CheckMasterFunction(input);
 	}
 
 
@@ -365,7 +364,7 @@ namespace TNNT
 	{
 		unsigned start;
 		unsigned stop;
-		ThreadWorkloadDivider(start, stop, m_LayerLayout[0].Nodes, thread);
+		ThreadWorkloadDivider(start, stop, m_InputBufferCount, thread);
 
 		
 
@@ -373,7 +372,7 @@ namespace TNNT
 		while (index < stop)
 		{
 			
-			m_ABuffer[index] = input[index];
+			m_InputBuffer[index] = input[index];
 			
 			index++;
 		}
@@ -383,7 +382,7 @@ namespace TNNT
 	{
 		unsigned start;
 		unsigned stop;
-		ThreadWorkloadDivider(start, stop, m_LayerLayout[m_LayerLayoutCount - 1].Nodes, thread);
+		ThreadWorkloadDivider(start, stop, m_OutputBufferCount, thread);
 
 		
 
@@ -531,8 +530,8 @@ namespace TNNT
 		{
 			m_PositionData.Layer = lastLayer;
 
-			m_PositionData.Z = m_ZBufferCount - m_LayerLayout[lastLayer].Nodes;
-			m_PositionData.A = m_ABufferCount - m_LayerLayout[lastLayer].Nodes;
+			m_PositionData.Z = m_ZCount - m_LayerLayout[lastLayer].Nodes;
+			m_PositionData.A = m_ACount - m_LayerLayout[lastLayer].Nodes;
 
 			m_PositionData.Biases = m_BiasesCount - m_LayerLayout[lastLayer].Biases;
 			m_PositionData.Weights = m_WeightsCount - m_LayerLayout[lastLayer].Weights;
@@ -594,9 +593,9 @@ namespace TNNT
 
 
 			
-			unsigned indedx = m_Indices[exampleIndex + batch * m_HyperParameters.BatchCount];
-			SetInput(&(m_Data->TrainingInputs[indedx * m_LayerLayout[0].Nodes]), thread);
-			SetTarget(&(m_Data->TraningTargets[indedx * m_LayerLayout[m_LayerLayoutCount - 1].Nodes]), thread);
+			unsigned index = m_Indices[exampleIndex + batch * m_HyperParameters.BatchCount];
+			SetInput(&(m_Data->TrainingInputs[index * m_LayerLayout[0].Nodes]), thread);
+			SetTarget(&(m_Data->TraningTargets[index * m_LayerLayout[m_LayerLayoutCount - 1].Nodes]), thread);
 			
 			SpinLock(thread);
 
@@ -752,8 +751,8 @@ namespace TNNT
 		while (checkIndex < m_Data->TestCount)
 		{
 
-			SetInput(&m_Data->TestInputs[checkIndex * m_LayerLayout[0].Nodes], thread);
-			SetTarget(&m_Data->TestTargets[checkIndex * m_LayerLayout[m_LayerLayoutCount - 1].Nodes], thread);
+			SetInput(&m_Data->TestInputs[checkIndex * m_InputBufferCount], thread);
+			SetTarget(&m_Data->TestTargets[checkIndex * m_OutputBufferCount], thread);
 			SpinLock(thread);
 
 			FeedForward(thread);
@@ -803,7 +802,7 @@ namespace TNNT
 
 	void NetworkPrototypeMT::CheckSuccessRateSlaveFunction(unsigned thread)
 	{
-		const unsigned Ap = m_ABufferCount - m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
+		
 
 		
 
@@ -811,7 +810,7 @@ namespace TNNT
 		while (checkIndex < m_Data->TestCount)
 		{
 			
-			SetInput(&m_Data->TestInputs[checkIndex * m_LayerLayout[0].Nodes], thread);
+			SetInput(&m_Data->TestInputs[checkIndex * m_InputBufferCount], thread);
 			SpinLock(thread);
 			FeedForward(thread);
 
@@ -819,27 +818,29 @@ namespace TNNT
 			float champion = 0;
 
 			unsigned start, stop;
-			ThreadWorkloadDivider(start, stop, m_LayerLayout[m_LayerLayoutCount - 1].Nodes, thread);
+			ThreadWorkloadDivider(start, stop, m_OutputBufferCount, thread);
 
 			unsigned outputIndex = start;
 			while (outputIndex < stop)
 			{
 
-				if (m_ABuffer[Ap + outputIndex] >= champion)
+				if (m_OutputBuffer[outputIndex] >= champion)
 				{
-					champion = m_ABuffer[Ap + outputIndex];
+					champion = m_OutputBuffer[outputIndex];
 					championItterator = outputIndex;
 				}
 
 
 				outputIndex++;
 			}
-			if (championItterator != -1)
+			if (championItterator == -1)
 			{
 				
-				m_GuessBuffer[thread] = championItterator;
+				assert(false);
 				
 			}
+			m_GuessBuffer[thread] = championItterator;
+
 			
 			m_SlaveFlags[thread] = true;
 			
@@ -865,7 +866,7 @@ namespace TNNT
 			thread++;
 		}
 
-		const unsigned Ap = m_ABufferCount - m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
+		
 		float score = 0.0f;
 
 		unsigned checkIndex = 0;
@@ -876,15 +877,15 @@ namespace TNNT
 			
 			WaitForSlaves();
 
-			unsigned lim = (m_SlaveThreadCount < m_LayerLayout[m_LayerLayoutCount - 1].Nodes) ? m_SlaveThreadCount : m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
+			unsigned lim = (m_SlaveThreadCount < m_OutputBufferCount) ? m_SlaveThreadCount : m_OutputBufferCount;
 
 			unsigned threadItt = 0;
 			while (threadItt < lim)
 			{
 				unsigned itt = m_GuessBuffer[threadItt];
-				if (m_ABuffer[Ap + itt] >= champion)
+				if (m_OutputBuffer[itt] >= champion)
 				{
-					champion = m_ABuffer[Ap + itt];
+					champion = m_OutputBuffer[itt];
 					championItterator = itt;
 				}
 
@@ -892,7 +893,7 @@ namespace TNNT
 				threadItt++;
 			}
 
-			if (m_Data->TestTargets[m_LayerLayout[m_LayerLayoutCount - 1].Nodes * checkIndex + championItterator] == 1)
+			if (m_Data->TestTargets[m_OutputBufferCount * checkIndex + championItterator] == 1)
 			{
 				score += 1.0f;
 			}
@@ -919,6 +920,101 @@ namespace TNNT
 
 		return rate;
 
+	}
+
+	void NetworkPrototypeMT::CheckSlaveFunction(float* input, unsigned thread)
+	{
+
+
+		SetInput(input , thread);
+		SpinLock(thread);
+		FeedForward(thread);
+
+		int championItterator = -1;
+		float champion = 0;
+
+		unsigned start, stop;
+		ThreadWorkloadDivider(start, stop, m_OutputBufferCount, thread);
+
+		unsigned outputIndex = start;
+		while (outputIndex < stop)
+		{
+
+			if (m_OutputBuffer[outputIndex] >= champion)
+			{
+				champion = m_OutputBuffer[outputIndex];
+				championItterator = outputIndex;
+			}
+
+
+			outputIndex++;
+		}
+		if (championItterator == -1)
+		{
+			assert(false);
+		}
+
+		m_GuessBuffer[thread] = championItterator;
+
+
+		m_SlaveFlags[thread] = true;
+
+
+
+		
+		
+		
+	}
+
+	unsigned NetworkPrototypeMT::CheckMasterFunction(float* input)
+	{
+		auto start = std::chrono::high_resolution_clock::now();
+
+
+		
+
+		unsigned thread = 0;
+		while (thread < m_SlaveThreadCount)
+		{
+			m_SlaveThreads[thread] = std::thread(&NetworkPrototypeMT::CheckSlaveFunction, this, input, thread);
+			thread++;
+		}
+
+
+
+		int championItterator = -1;
+		float champion = 0;
+
+		WaitForSlaves();
+
+		unsigned lim = (m_SlaveThreadCount < m_OutputBufferCount) ? m_SlaveThreadCount : m_OutputBufferCount;
+
+		unsigned threadItt = 0;
+		while (threadItt < lim)
+		{
+			unsigned itt = m_GuessBuffer[threadItt];
+			if (m_OutputBuffer[itt] >= champion)
+			{
+				champion = m_OutputBuffer[itt];
+				championItterator = itt;
+			}
+
+
+			threadItt++;
+		}
+
+		thread = 0;
+		while (thread < m_SlaveThreadCount)
+		{
+			m_SlaveThreads[thread].join();
+			thread++;
+		}
+
+		auto stop = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<float>  time = stop - start;
+		m_LastTime[2] = time.count();
+
+		return championItterator;
 	}
 
 

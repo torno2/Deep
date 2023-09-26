@@ -1,4 +1,6 @@
 #pragma once
+#include "Control.h"
+
 
 namespace TNNT
 {
@@ -78,11 +80,20 @@ namespace TNNT
 
 
 
-
+#if OLD
 		//For the trainingprocess
-		NetworkRelayFunction TrainingFunction;
+		NetworkRelayFunction TrainingFunctions;
 
-		NetworkRelayFunction RegularizationFunction;
+		NetworkRelayFunction RegularizationFunctions;
+#endif
+
+#if NEW
+		//For the trainingprocess
+		NetworkRelayFunction* TrainingFunctions;
+
+		NetworkRelayFunction* RegularizationFunctions;
+
+#endif
 
 
 
@@ -95,11 +106,18 @@ namespace TNNT
 			delete[] FeedForwardCallBackFunctions;
 			delete[] BackPropegateCallBackFunctionsZ;
 			delete[] BackPropegateCallBackFunctionsBW;
+
+#if NEW
+			delete[] TrainingFunctions;
+			delete[] RegularizationFunctions;
+#endif
 		}
 
 	};
 
+
 	class NetworkPrototypeMT;
+
 	struct FunctionsLayoutMT
 	{
 
@@ -201,7 +219,7 @@ namespace TNNT
 
 
 
-	//TODO: Temporary, remove later.
+	//TODO: Old, remove later.
 	struct LayerFucntionsLayout
 	{
 

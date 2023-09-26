@@ -130,9 +130,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Control.h" />
     <ClInclude Include="DataProcessing.h" />
     <ClInclude Include="LayerFunctions.h" />
     <ClInclude Include="LayerFunctionsMT.h" />
+    <ClInclude Include="LayerLayout.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="NetworkPrototype.h" />
     <ClInclude Include="NetworkPrototypeMT.h" />
@@ -156,8 +158,6 @@
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Save.bin" />
-    <None Include="Save2.bin" />
     <None Include="testIm.idx3-ubyte" />
     <None Include="testLabel.idx1-ubyte" />
     <None Include="trainIm.idx3-ubyte" />

@@ -13,6 +13,7 @@ namespace Math
 	}
 	float Sigmoid(float z)
 	{
+		float expo = std::exp(-z);
 		float result = 1 / (1 + std::exp(-z));
 		return result;
 	}

@@ -376,27 +376,22 @@ namespace TNNT
 
 	void NeuralNetwork::SetBiasesToTemp()
 	{
-		unsigned index = 0;
-		while (index < m_BiasesCount)
-		{
-			m_Biases[index] = m_BiasesBuffer[index];
-			index++;
-		}
+
+		
+		memcpy(m_Biases, m_BiasesBuffer, sizeof(float) * m_BiasesCount);
 	}
 
 	void NeuralNetwork::SetTempToBiases()
 	{
-		unsigned index = 0;
-		while (index < m_BiasesCount)
-		{
-			m_BiasesBuffer[index] = m_Biases[index];
-			index++;
-		}
+		memcpy(m_BiasesBuffer, m_Biases, sizeof(float) * m_BiasesCount);
 	}
 
 
 	void NeuralNetwork::SetWeightsToTemp()
 	{
+
+		memcpy(m_Weights, m_WeightsBuffer, sizeof(float) * m_WeightsCount);
+
 		unsigned currentOffset = 0;
 		unsigned currentSize = 0;
 		unsigned layoutIndex = 1;
@@ -407,7 +402,6 @@ namespace TNNT
 			unsigned index = 0;
 			while (index < currentSize)
 			{
-				m_Weights[currentOffset + index] = m_WeightsBuffer[currentOffset + index];
 				m_WeightsTranspose[currentOffset + (index / m_LayerLayout[layoutIndex - 1]) + (index % m_LayerLayout[layoutIndex - 1]) * m_LayerLayout[layoutIndex]] = m_WeightsBuffer[currentOffset + index];
 				index++;
 			}
@@ -419,12 +413,7 @@ namespace TNNT
 
 	void NeuralNetwork::SetTempToWeights()
 	{
-		unsigned index = 0;
-		while (index < m_WeightsCount)
-		{
-			m_WeightsBuffer[index] = m_Weights[index];
-			index++;
-		}
+		memcpy(m_WeightsBuffer, m_Weights, sizeof(float) * m_WeightsCount);
 	}
 
 	void NeuralNetwork::ResetWeightsTranspose()
@@ -780,8 +769,10 @@ namespace TNNT
 		unsigned epochCount = 0;
 		while (epochCount < epochs)
 		{
+			unsigned randomIndexPos = 0;
 			unsigned randomIndexCount = num;
-
+	
+			
 
 			unsigned batchNum = 0;
 			while (batchNum < batchCount)
@@ -790,11 +781,12 @@ namespace TNNT
 				while (batchIndex < batchSize)
 				{
 
-					unsigned randomIndex = mt() % randomIndexCount;
+					unsigned randomIndex = mt() % randomIndexCount + randomIndexPos;
 
 					unsigned epochRandomIndex = indices[randomIndex];
-					indices[randomIndex] = indices[randomIndexCount - 1];
-					indices[randomIndexCount - 1] = epochRandomIndex;
+					indices[randomIndex] = indices[randomIndexPos];
+					indices[randomIndexPos] = epochRandomIndex;
+
 
 					unsigned inputIndex = 0;
 					while (inputIndex < m_LayerLayout[0])
@@ -811,7 +803,7 @@ namespace TNNT
 					}
 
 
-
+					randomIndexPos++;
 					randomIndexCount--;
 
 					batchIndex++;
@@ -829,11 +821,11 @@ namespace TNNT
 				while (batchIndex < remainingBatch)
 				{
 
-					unsigned randomIndex = mt() % randomIndexCount;
+					unsigned randomIndex = mt() % randomIndexCount + randomIndexPos;
 
 					unsigned epochRandomIndex = indices[randomIndex];
-					indices[randomIndex] = indices[randomIndexCount - 1];
-					indices[randomIndexCount - 1] = epochRandomIndex;
+					indices[randomIndex] = indices[randomIndexPos];
+					indices[randomIndexPos] = epochRandomIndex;
 
 					unsigned inputIndex = 0;
 					while (inputIndex < m_LayerLayout[0])
@@ -850,8 +842,9 @@ namespace TNNT
 					}
 
 
-
+					randomIndexPos++;
 					randomIndexCount--;
+					
 					batchIndex++;
 
 				}
@@ -859,8 +852,14 @@ namespace TNNT
 			}
 
 
+
 			epochCount++;
 		}
+
+		
+
+		
+
 
 		delete[] inputBuffer;
 		delete[] outputBuffer;

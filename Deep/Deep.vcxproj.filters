@@ -51,6 +51,12 @@
     <ClInclude Include="LayerFunctionsMT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LayerLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Control.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NeuralNetwork.cpp">
@@ -89,12 +95,6 @@
     <None Include="testIm.idx3-ubyte" />
     <None Include="testLabel.idx1-ubyte" />
     <None Include="trainIm.idx3-ubyte" />
-    <None Include="Save.bin">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Save2.bin">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Experiment.txt" />

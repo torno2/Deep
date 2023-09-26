@@ -27,7 +27,7 @@ namespace TNNT
 				{
 					
 					weightedSum +=
-						n->m_ABuffer[(n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer-1].Nodes) + prevIndex] *
+						n->m_A[(n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer-1].Nodes) + prevIndex] *
 						n->m_Weights[n->m_PositionData.Weights + n->m_LayerLayout[n->m_PositionData.Layer -1].Nodes * layerIndex + prevIndex];
 
 					prevIndex++;
@@ -36,8 +36,8 @@ namespace TNNT
 
 
 				
-				n->m_ZBuffer[layerIndex + n->m_PositionData.Z] = weightedSum + n->m_Biases[layerIndex + n->m_PositionData.Biases];
-				n->m_ABuffer[layerIndex + n->m_PositionData.A] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(n->m_ZBuffer[layerIndex + n->m_PositionData.Z]);
+				n->m_Z[layerIndex + n->m_PositionData.Z] = weightedSum + n->m_Biases[layerIndex + n->m_PositionData.Biases];
+				n->m_A[layerIndex + n->m_PositionData.A] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(n->m_Z[layerIndex + n->m_PositionData.Z]);
 				
 
 				layerIndex++;
@@ -75,7 +75,7 @@ namespace TNNT
 				
 				
 				
-				float dz = n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer - 1].f(n->m_ZBuffer[n->m_PositionData.Z + layerIndex]);
+				float dz = n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer - 1].f(n->m_Z[n->m_PositionData.Z + layerIndex]);
 				n->m_DeltaZ[n->m_PositionData.Z + layerIndex] = errorSum * dz;
 				
 
@@ -109,13 +109,13 @@ namespace TNNT
 				while (prevLayerIndex < n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes)
 				{
 					
-					float a = n->m_ABuffer[prevAPos + prevLayerIndex];
+					float a = n->m_A[prevAPos + prevLayerIndex];
 					float dw = a * dz;
 
 					
 					n->m_DeltaWeights[n->m_PositionData.Weights + n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes * layerIndex + prevLayerIndex] = dw;
 					
-
+				
 
 
 					prevLayerIndex++;
@@ -138,8 +138,6 @@ namespace TNNT
 
 		
 
-			unsigned startAPos = n->m_ABufferCount - n->m_LayerLayout[n->m_LayerLayoutCount - 1].Nodes;
-
 			unsigned start, stop;
 			n->ThreadWorkloadDivider(start, stop, n->m_LayerLayout[n->m_LayerLayoutCount - 1].Nodes, thread);
 
@@ -147,13 +145,13 @@ namespace TNNT
 			while (layerIndex < stop)
 			{
 				
-				float a = n->m_ABuffer[startAPos + layerIndex];
+				float a = n->m_OutputBuffer[layerIndex];
 				float y = n->m_TargetBuffer[layerIndex];
 
 				float cost = Math::CrossEntropy(a, y);
 
-				
-				n->m_CostBuffer[thread] += cost;
+
+				n->m_CostBuffer[thread] += cost; 
 				
 
 
@@ -166,15 +164,15 @@ namespace TNNT
 
 			unsigned start, stop;
 
-			n->ThreadWorkloadDivider(start, stop, n->m_LayerLayout[n->m_PositionData.Layer].Nodes, thread);
+			n->ThreadWorkloadDivider(start, stop, n->m_OutputBufferCount, thread);
 		
 
 			unsigned layerIndex = start;
 			while (layerIndex < stop)
 			{
 				
-				float z = n->m_ZBuffer[n->m_PositionData.Z + layerIndex];
-				float a = n->m_ABuffer[n->m_PositionData.A + layerIndex];
+				float z = n->m_Z[n->m_PositionData.Z + layerIndex];
+				float a = n->m_OutputBuffer[layerIndex];
 				float y = n->m_TargetBuffer[layerIndex];
 
 				float dz = Math::CrossEntropyCostDerivative(z, a, y);

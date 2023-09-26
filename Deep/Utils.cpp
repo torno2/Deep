@@ -49,6 +49,28 @@ void PrintWeights(unsigned* layout, unsigned layoutSize, float* weights,unsigned
 	}
 }
 
+void PrintImg(float* img, unsigned width, unsigned height)
+{
+	for (int j = 0; j < height; j++)
+	{
+		for (int i = 0; i < width; i++)
+		{
+			if (img[j * width + i] == 0)
+			{
+				std::cout << " ";
+			}
+			else
+			{
+				std::cout << "x";
+			}
+			
+		}
+		pr("");
+	}
+
+
+}
+
 void Timer::Start()
 {
 	start = std::chrono::high_resolution_clock::now();

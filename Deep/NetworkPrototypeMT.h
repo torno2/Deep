@@ -10,6 +10,7 @@ namespace TNNT
 	{
 
 	public:
+
 		//Order A, Weights, Biases, Z, dZ, dWeights, dBiases, WeightsBuffer, BiasesBuffer 
 		float* m_NetworkFixedData;
 
@@ -18,16 +19,22 @@ namespace TNNT
 
 		FunctionsLayoutMT m_Functions;
 
-		float* m_ABuffer;
-		unsigned m_ABufferCount;
+		float* m_A;
+		unsigned m_ACount;
 
 
-		float* m_ZBuffer;
+		float* m_Z;
 		float* m_DeltaZ;
-		unsigned m_ZBufferCount;
+		unsigned m_ZCount;
 
 
+		float* m_InputBuffer;
+		unsigned m_InputBufferCount;
+
+		float* m_OutputBuffer;
 		float* m_TargetBuffer;
+		unsigned m_OutputBufferCount;
+
 
 		float* m_Weights;
 		float* m_Biases;
@@ -40,6 +47,7 @@ namespace TNNT
 
 		unsigned m_WeightsCount;
 		unsigned m_BiasesCount;
+
 
 		float* m_CostBuffer;
 		unsigned* m_GuessBuffer;
@@ -83,7 +91,7 @@ namespace TNNT
 
 		void Train(DataSet* data, HyperParameters& params);
 
-
+		unsigned Check(float* input);
 
 
 
@@ -132,7 +140,9 @@ namespace TNNT
 		void CheckSuccessRateSlaveFunction(unsigned thread);
 		float CheckSuccessRateMasterFunction();
 
-
+		void CheckSlaveFunction(float* input, unsigned thread);
+		unsigned CheckMasterFunction(float* input);
+		
 
 
 	};

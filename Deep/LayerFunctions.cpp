@@ -24,7 +24,9 @@ namespace TNNT
 				}
 
 				n->m_Z[layerIndex + n->m_PositionData.Z] = weightedSum + n->m_Biases[layerIndex + n->m_PositionData.Biases];
+				float z = weightedSum + n->m_Biases[layerIndex + n->m_PositionData.Biases];
 				n->m_A[layerIndex + n->m_PositionData.A] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(n->m_Z[layerIndex + n->m_PositionData.Z]);
+				float a = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(n->m_Z[layerIndex + n->m_PositionData.Z]);
 
 				layerIndex++;
 			}
@@ -99,6 +101,8 @@ namespace TNNT
 
 		void ConvolutionLayerFeedForward(NetworkPrototype* n)
 		{
+	
+			//Some of these constants may be usless.
 
 			const unsigned subLayers = 3;
 			const unsigned subLayerCount = n->m_LayerLayout[n->m_PositionData.Layer].Nodes / subLayers;
@@ -107,7 +111,7 @@ namespace TNNT
 			const unsigned subLayerWeightsCount = n->m_LayerLayout[n->m_PositionData.Layer].Weights / subLayers;
 
 			const unsigned prevSubLayers = 1;
-			const unsigned prevSubLayerCount = n->m_LayerLayout[n->m_PositionData.Layer-1].Nodes / prevSubLayers;
+			const unsigned prevSubLayerCount = n->m_LayerLayout[n->m_PositionData.Layer].Nodes / prevSubLayers;
 
 			const unsigned receptiveWidth = 5;
 			const unsigned receptiveHeight = 5;
@@ -115,16 +119,19 @@ namespace TNNT
 			const unsigned horizontalStride = 1;
 			const unsigned verticalStride = 1;
 
-			const unsigned imgWidth = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes/ prevSubLayers);
-			const unsigned imgHeight = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes/ prevSubLayers);
-			
-			
+			const unsigned imgWidth = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes / prevSubLayers);
+			const unsigned imgHeight = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes / prevSubLayers);
+
+
 			const unsigned prevLayerAPos = n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer-1].Nodes;
+			const unsigned prevLayerACount = n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes;
+
+			const unsigned horizontalSteps = (imgWidth - receptiveWidth ) / (horizontalStride) + 1;
+			const unsigned verticalSteps = (imgHeight - receptiveHeight ) / (verticalStride) + 1;
+
+			assert(imgWidth >= receptiveWidth && imgHeight >= receptiveHeight);
+
 			
-
-
-
-			const unsigned startA = 0;
 
 			unsigned subLayer = 0;
 			while (subLayer < subLayers)
@@ -133,9 +140,10 @@ namespace TNNT
 				unsigned subLayerIndex = 0;
 				while (subLayerIndex < subLayerCount)
 				{
-					//Beware "Edge"cases (The hint tells you to take a look at what happens when a receptive field goes outside of the image)
+					
 				
-					const unsigned startA = ((subLayerIndex * verticalStride) / (imgHeight - receptiveHeight + 1))* imgWidth + (subLayerIndex * horizontalStride) % (imgWidth - receptiveWidth + 1);
+					const unsigned leftUpperCornerA = ((subLayerIndex % horizontalSteps) * horizontalStride) + ((subLayerIndex / verticalSteps) * verticalStride) * imgWidth ;
+
 
 
 					float weightedSum = 0;
@@ -149,7 +157,7 @@ namespace TNNT
 
 							weightedSum +=
 								n->m_Weights[n->m_PositionData.Weights + subLayerIndex * subLayerWeightsCount + height * receptiveWidth + width] *
-								n->m_A[prevLayerAPos + startA + height * imgWidth + width ];
+								n->m_A[prevLayerAPos  + leftUpperCornerA + height * imgWidth + width ];
 
 
 							width++;
@@ -157,7 +165,10 @@ namespace TNNT
 						height++;
 					}
 
-					n->m_A[n->m_PositionData.A + subLayerIndex + subLayer* subLayerCount] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(weightedSum + n->m_Biases[n->m_PositionData.Biases + subLayerIndex* subLayerBiasesCount]);
+					float z = weightedSum + n->m_Biases[n->m_PositionData.Biases + subLayerIndex * subLayerBiasesCount];
+
+					n->m_Z[n->m_PositionData.Z + subLayerIndex + subLayer * subLayerCount] = z;
+					n->m_A[n->m_PositionData.A + subLayerIndex + subLayer * subLayerCount] = n->m_Functions.NeuronFunctions[n->m_PositionData.Layer - 1].f(z);
 
 					subLayerIndex++;
 				}
@@ -167,15 +178,8 @@ namespace TNNT
 
 		void ConvolutionLayerBackpropegateZ(NetworkPrototype* n)
 		{
-			const unsigned subLayers = 3;
-			const unsigned subLayerCount = n->m_LayerLayout[n->m_PositionData.Layer].Nodes / subLayers;
+			//Some of these constants may be usless.
 
-			const unsigned subLayerBiasesCount = n->m_LayerLayout[n->m_PositionData.Layer].Biases / subLayers;
-			const unsigned subLayerWeightsCount = n->m_LayerLayout[n->m_PositionData.Layer].Weights / subLayers;
-		}
-
-  		void ConvolutionLayerBackpropegateBW(NetworkPrototype* n)
-		{
 			const unsigned subLayers = 3;
 			const unsigned subLayerCount = n->m_LayerLayout[n->m_PositionData.Layer].Nodes / subLayers;
 
@@ -196,18 +200,84 @@ namespace TNNT
 
 
 			const unsigned prevLayerAPos = n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer].Nodes;
+			const unsigned prevLayerACount = n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes;
+
+			const unsigned horizontalSteps = (imgWidth - receptiveWidth) / (horizontalStride)+1;
+			const unsigned verticalSteps = (imgHeight - receptiveHeight) / (verticalStride)+1;
+
+			assert(imgWidth >= receptiveWidth && imgHeight >= receptiveHeight);
+		}
+
+  		void ConvolutionLayerBackpropegateBW(NetworkPrototype* n)
+		{
+			//Some of these constants may be usless.
+
+			const unsigned subLayers = 3;
+			const unsigned subLayerCount = n->m_LayerLayout[n->m_PositionData.Layer].Nodes / subLayers;
+
+			const unsigned subLayerBiasesCount = n->m_LayerLayout[n->m_PositionData.Layer].Biases / subLayers;
+			const unsigned subLayerWeightsCount = n->m_LayerLayout[n->m_PositionData.Layer].Weights / subLayers;
+
+			const unsigned prevSubLayers = 1;
+			const unsigned prevSubLayerCount = n->m_LayerLayout[n->m_PositionData.Layer].Nodes / prevSubLayers;
+
+			const unsigned receptiveWidth = 5;
+			const unsigned receptiveHeight = 5;
+
+			const unsigned horizontalStride = 1;
+			const unsigned verticalStride = 1;
+
+			const unsigned imgWidth  = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes / prevSubLayers);
+			const unsigned imgHeight = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes / prevSubLayers);
+
+
+			const unsigned prevLayerAPos = n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer-1].Nodes;
+			const unsigned prevLayerACount = n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes;
+
+			const unsigned horizontalSteps = (imgWidth - receptiveWidth) / (horizontalStride)+1;
+			const unsigned verticalSteps = (imgHeight - receptiveHeight) / (verticalStride)+1;
+
+			assert(imgWidth >= receptiveWidth && imgHeight >= receptiveHeight);
 
 			unsigned subLayer = 0;
 			while (subLayer < subLayers)
 			{
-				unsigned weightIndex = 0;
-				while (weightIndex < subLayerWeightsCount)
+				unsigned subLayerIndex = 0;
+				while (subLayerIndex < subLayerCount)
 				{
-					//TODO: COMPLETE THIS
-					n->m_DeltaWeights[n->m_PositionData.Weights] =2 ;
-				}
 
-				subLayer++;
+					const unsigned leftUpperCornerA = ((subLayerIndex % horizontalSteps) * horizontalStride) + ((subLayerIndex / verticalSteps) * verticalStride) * imgWidth;
+
+					unsigned height = 0;
+					while (height < receptiveHeight)
+					{
+
+						unsigned width = 0;
+						while(width < receptiveWidth)
+						{
+
+
+							
+
+
+								n->m_DeltaWeights[n->m_PositionData.Weights + subLayerWeightsCount * subLayer + height* receptiveWidth + width] =
+									n->m_DeltaZ[n->m_PositionData.Z + subLayer * subLayerCount + subLayerIndex] *
+									n->m_A[prevLayerAPos + leftUpperCornerA + height * prevLayerACount + width];
+
+							
+
+
+							width++;
+						}
+
+						height++;
+					}
+
+					n->m_Biases[n->m_PositionData.Biases + subLayerBiasesCount * subLayer + subLayerIndex] = n->m_DeltaZ[n->m_PositionData.Z + subLayer * subLayerCount + subLayerIndex];
+
+				subLayerIndex++;
+				}
+			subLayer++;
 			}
 
 		}
@@ -215,15 +285,14 @@ namespace TNNT
 
 		void PoolingLayerFeedForward(NetworkPrototype* n)
 		{
-			const unsigned subLayers = 3;
+			const unsigned subLayers = 1;
 			const unsigned subLayerCount = n->m_LayerLayout[n->m_PositionData.Layer].Nodes / subLayers;
 
-			const unsigned subLayerBiases = n->m_LayerLayout[n->m_PositionData.Layer].Biases / subLayers;
-			const unsigned subLayerWeights = n->m_LayerLayout[n->m_PositionData.Layer].Weights / subLayers;
+			const unsigned subLayerBiasesCount = n->m_LayerLayout[n->m_PositionData.Layer].Biases / subLayers;
+			const unsigned subLayerWeightsCount = n->m_LayerLayout[n->m_PositionData.Layer].Weights / subLayers;
 
-			const unsigned prevSubLayers = 3;
-			const unsigned prevSubLayerCount = n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes / prevSubLayers;
-
+			const unsigned prevSubLayers = 1;
+			const unsigned prevSubLayerCount = n->m_LayerLayout[n->m_PositionData.Layer-1].Nodes / prevSubLayers;
 
 			const unsigned receptiveWidth = 2;
 			const unsigned receptiveHeight = 2;
@@ -231,11 +300,17 @@ namespace TNNT
 			const unsigned horizontalStride = 2;
 			const unsigned verticalStride = 2;
 
-			const unsigned imgWidth = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes/ prevSubLayerCount);
-			const unsigned imgHeight = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes/ prevSubLayerCount);
+			const unsigned imgWidth = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes / prevSubLayers);
+			const unsigned imgHeight = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes / prevSubLayers);
 
 
-			const unsigned prevLayerAPos = n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer].Nodes;
+			const unsigned prevLayerAPos = n->m_PositionData.A - n->m_LayerLayout[n->m_PositionData.Layer-1].Nodes;
+			const unsigned prevLayerACount = n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes;
+
+			const unsigned horizontalSteps = (imgWidth - receptiveWidth ) / (horizontalStride) + 1;
+			const unsigned verticalSteps = (imgHeight - receptiveHeight ) / (verticalStride) + 1;
+
+			assert(imgWidth >= receptiveWidth && imgHeight >= receptiveHeight);
 
 			assert(prevSubLayers == subLayers);
 
@@ -250,11 +325,11 @@ namespace TNNT
 				while (subLayerIndex < subLayerCount)
 				{
 					//Beware "Edge"cases (The hint tells you to take a look at what happens when a receptive field goes outside of the image)
-					const unsigned startA = ((subLayerIndex * verticalStride) / (imgHeight - receptiveHeight + 1)) * imgWidth + (subLayerIndex * horizontalStride) % (imgWidth - receptiveWidth + 1);
+					const unsigned leftUpperCornerA = ((subLayerIndex % horizontalSteps) * horizontalStride) + ((subLayerIndex / verticalSteps) * verticalStride) * imgWidth;
 
 
 					
-					champ = n->m_A[prevLayerAPos + subLayer * prevSubLayerCount + startA];
+					champ = n->m_A[prevLayerAPos + subLayer * prevSubLayerCount + leftUpperCornerA];
 
 					unsigned height = 0;
 					while (height < receptiveHeight)
@@ -263,7 +338,7 @@ namespace TNNT
 						while (width < receptiveWidth)
 						{
 								
-								check = n->m_A[prevLayerAPos+ subLayer* prevSubLayerCount + startA + width + height * imgWidth];
+								check = n->m_A[prevLayerAPos+ subLayer* prevSubLayerCount + leftUpperCornerA + width + height * imgWidth];
 								if (check > champ)
 								{
 									champ = check;
@@ -300,51 +375,67 @@ namespace TNNT
 			const unsigned horizontalStride = 2;
 			const unsigned verticalStride = 2;
 
-			const unsigned imgWidth = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes / subLayerCount);
-			const unsigned imgHeight = sqrtf(n->m_LayerLayout[n->m_PositionData.Layer - 1].Nodes / subLayerCount);
+			const unsigned imgWidth = sqrtf(subLayerCount);
+			const unsigned imgHeight = sqrtf(subLayerCount);
 
 
 			const unsigned latterLayerZPos = n->m_PositionData.Z + n->m_LayerLayout[n->m_PositionData.Layer].Nodes;
 			const unsigned latterLayerAPos = n->m_PositionData.A + n->m_LayerLayout[n->m_PositionData.Layer].Nodes;
 
+
+			const unsigned horizontalSteps = (imgWidth - receptiveWidth) / (horizontalStride) + 1;
+			const unsigned verticalSteps = (imgHeight - receptiveHeight) / (verticalStride)   + 1;
+
+			assert(imgWidth >= receptiveWidth && imgHeight >= receptiveHeight);
+
+
 			assert(latterSubLayers == subLayers);
 
 			unsigned subLayer = 0;
-			while (subLayer < latterSubLayers)
+			while (subLayer < subLayers)
 			{
 
-				unsigned subLayerIndex = 0;
-				while (subLayerIndex < latterSubLayerCount)
+				unsigned latterSubLayerIndex = 0;
+				while (latterSubLayerIndex < latterSubLayerCount)
 				{
+
 					//TODO: Beware "Edge"cases (This hint tells you to take a look at what happens when a receptive field goes outside of the image. Also what do you do when the field skips entries entierly)
-					const unsigned startA = ((subLayerIndex * verticalStride) / (imgHeight - receptiveHeight + 1)) * imgWidth + (subLayerIndex * horizontalStride) % (imgWidth - receptiveWidth + 1);
+					
+					const unsigned leftUpperCornerA = ((latterSubLayerIndex % horizontalSteps) * horizontalStride) + ((latterSubLayerIndex / verticalSteps) * verticalStride) * imgWidth;
 
 
-					float dz = n->m_DeltaZ[latterLayerZPos + subLayer * latterSubLayerCount + subLayerIndex];
-					 
+
+
+
+
+					const float dz = n->m_DeltaZ[latterLayerZPos + subLayer * latterSubLayerCount + latterSubLayerIndex];
+
+
+					const float aLatter = n->m_A[latterLayerAPos + subLayer * latterSubLayerCount + latterSubLayerIndex];
 
 					unsigned height = 0;
 					while (height < receptiveHeight)
 					{
 						unsigned width = 0;
 						while (width < receptiveWidth)
-						{	
-							//TODO: There is some funky shit that happens here when a z is observed in more than one receptive field
-							if (n->m_A[n->m_PositionData.A + subLayer * subLayerCount + startA + height*imgWidth + width] 
-								== n->m_A[latterLayerAPos + subLayer * latterSubLayerCount + subLayerIndex] )
+						{
+							const float a = n->m_A[n->m_PositionData.A + subLayer * subLayerCount + leftUpperCornerA + height * imgWidth + width];
+
+							//TODO: There is some funky shit that happens here when a z is observed in more than one receptive field. Edit: Think you should add the changes made for each receptive field it appears in.
+							if ( a == aLatter)
 							{
-								n->m_DeltaZ[n->m_PositionData.Z + subLayer * subLayerCount + startA + height * imgWidth + width] =
-									dz * n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer-1].f(n->m_Z[n->m_PositionData.Z]); // f(n->m_Z[n->m_PositionData.Z]) does this need to be fixed?
+								n->m_DeltaZ[n->m_PositionData.Z + subLayer * subLayerCount + leftUpperCornerA + height * imgWidth + width] =
+									dz * n->m_Functions.NeuronFunctionsDerivatives[n->m_PositionData.Layer-1].f(n->m_Z[n->m_PositionData.Z+ latterLayerZPos + subLayer * latterSubLayerCount + latterSubLayerIndex]); // f(n->m_Z[n->m_PositionData.Z]) does this need to be fixed?
 							}
 							else {
-								n->m_DeltaZ[n->m_PositionData.Z + subLayer * subLayerCount + startA + height * imgWidth + width] = 0;
+								n->m_DeltaZ[n->m_PositionData.Z + subLayer * subLayerCount + leftUpperCornerA + height * imgWidth + width] = 0;
 							} 
 							width++;
 						}
 						height++;
 					}
 
-					subLayerIndex++;
+					latterSubLayerIndex++;
 				}
 				subLayer++;
 			}
@@ -374,10 +465,10 @@ namespace TNNT
 
 
 			unsigned layerIndex = 0;
-			while (layerIndex < n->m_LayerLayout[n->m_LayerLayoutCount - 1].Nodes)
+			while (layerIndex < n->m_OutputBufferCount)
 			{
 				
-				float a = n->m_A[startAPos + layerIndex];
+				float a = n->m_OutputBuffer[layerIndex];
 				float y = n->m_TargetBuffer[layerIndex];
 
 				float cost = Math::CrossEntropy(a, y);
@@ -394,11 +485,11 @@ namespace TNNT
 
 
 			unsigned layerIndex = 0;
-			while (layerIndex < n->m_LayerLayout[n->m_PositionData.Layer].Nodes)
+			while (layerIndex < n->m_OutputBufferCount)
 			{
-				//Right here we need the a from this layer, and we therfore have to add the length of the previous layer to get to the start of this one.
+				
 				float z = n->m_Z[n->m_PositionData.Z + layerIndex];
-				float a = n->m_A[n->m_PositionData.A + layerIndex];
+				float a = n->m_OutputBuffer[layerIndex];
 				float y = n->m_TargetBuffer[layerIndex];
 
 				float dz = Math::CrossEntropyCostDerivative(z, a, y);
@@ -413,7 +504,10 @@ namespace TNNT
 		}
 	}
 
-	namespace TrainingFunctions 
+
+	//Old
+#if OLD
+	namespace TrainingFunctions
 	{
 
 		void L2Regularization(NetworkPrototype* n)
@@ -424,7 +518,7 @@ namespace TNNT
 			unsigned index = 0;
 			while (index < n->m_WeightsCount)
 			{
-				
+
 				n->m_WeightsBuffer[index] *= (1 - (n->m_HyperParameters.LearningRate * n->m_HyperParameters.RegularizationConstant / ((float)n->m_Data->TrainingCount)));
 
 				index++;
@@ -453,6 +547,48 @@ namespace TNNT
 			}
 		}
 	}
+#endif
+
+	//New
+#if NEW
+
+	namespace TrainingFunctions 
+	{
+
+		void L2Regularization(NetworkPrototype* n)
+		{
+			
+
+			unsigned index = 0;
+			while (index < n->m_LayerLayout[n->m_PositionData.Layer].Weights)
+			{
+				
+				n->m_WeightsBuffer[n->m_PositionData.Weights+index] *= (1 - (n->m_HyperParameters.LearningRate * n->m_HyperParameters.RegularizationConstant / ((float)n->m_Data->TrainingCount)));
+
+				index++;
+			}
+		}
+
+		void GradientDecent(NetworkPrototype* n)
+		{
+
+			unsigned index = 0;
+			while (index < n->m_LayerLayout[n->m_PositionData.Layer].Weights)
+			{
+
+				if (index < n->m_LayerLayout[n->m_PositionData.Layer].Biases)
+				{
+					n->m_BiasesBuffer[n->m_PositionData.Biases + index] -= (n->m_HyperParameters.LearningRate / ((float)n->m_HyperParameters.BatchCount)) * n->m_DeltaBiases[index];
+				}
+
+				n->m_WeightsBuffer[n->m_PositionData.Weights + index] -= (n->m_HyperParameters.LearningRate / ((float)n->m_HyperParameters.BatchCount)) * n->m_DeltaWeights[index];
+
+				index++;
+			}
+
+		}
+	}
+#endif
 }
 
 

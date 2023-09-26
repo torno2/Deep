@@ -23,9 +23,15 @@ namespace TNNT
 
 		m_Functions.CostFunction = functions.CostFunction;
 		m_Functions.CostFunctionDerivative = functions.CostFunctionDerivative;
-
-		m_Functions.TrainingFunction = functions.TrainingFunction;
-		m_Functions.RegularizationFunction = functions.RegularizationFunction;
+#if OLD
+		m_Functions.RegularizationFunctions = functions.RegularizationFunctions;
+		m_Functions.TrainingFunctions = functions.TrainingFunctions;
+#endif
+	
+#if NEW
+		m_Functions.RegularizationFunctions = new FunctionsLayout::NetworkRelayFunction[m_LayerLayoutCount - 1];
+		m_Functions.TrainingFunctions = new FunctionsLayout::NetworkRelayFunction[m_LayerLayoutCount - 1];
+#endif
 
 
 
@@ -41,13 +47,20 @@ namespace TNNT
 
 				m_Functions.FeedForwardCallBackFunctions[layoutIndex] = functions.FeedForwardCallBackFunctions[layoutIndex];
 				m_Functions.BackPropegateCallBackFunctionsBW[layoutIndex] = functions.BackPropegateCallBackFunctionsBW[layoutIndex];
-
-
-
 				if (layoutIndex < m_LayerLayoutCount - 2)
 				{
 					m_Functions.BackPropegateCallBackFunctionsZ[layoutIndex] = functions.BackPropegateCallBackFunctionsZ[layoutIndex];
 				}
+
+#if NEW
+				m_Functions.RegularizationFunctions[layoutIndex] = functions.RegularizationFunctions[layoutIndex];
+
+				m_Functions.TrainingFunctions[layoutIndex] = functions.TrainingFunctions[layoutIndex];
+#endif
+
+
+
+
 
 			}
 
@@ -78,6 +91,10 @@ namespace TNNT
 			weightTotal += m_LayerLayout[layoutIndex].Weights;
 
 
+
+			
+
+
 			layoutIndex++;
 		}
 
@@ -88,14 +105,15 @@ namespace TNNT
 		m_WeightsCount = weightTotal;
 
 		m_InputBufferCount = m_LayerLayout[0].Nodes;
-		m_TargetBufferCount = m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
+		m_OutputBufferCount = m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
 
 		
 		//Order: A, Weights, Biases, Z, dZ, dWeights, dBiases, WeightsBuffer, BiasesBuffer, Target
-		m_NetworkFixedData = new float[m_ACount + 3 * m_WeightsCount + 3 * m_BiasesCount + 2 * m_ZCount + m_TargetBufferCount];
+		m_NetworkFixedData = new float[m_ACount + 3 * m_WeightsCount + 3 * m_BiasesCount + 2 * m_ZCount + m_OutputBufferCount];
 
 		m_A = m_NetworkFixedData;
 		m_InputBuffer = m_A;
+		m_OutputBuffer = &m_A[m_ACount - m_OutputBufferCount];
 
 		m_Weights = &m_NetworkFixedData[m_ACount];
 		m_Biases = &m_NetworkFixedData[m_ACount + m_WeightsCount];
@@ -110,6 +128,11 @@ namespace TNNT
 		m_BiasesBuffer = &m_NetworkFixedData[m_ACount + 3 * m_WeightsCount + 2 * m_BiasesCount + 2 * m_ZCount];
 		
 		m_TargetBuffer = &m_NetworkFixedData[m_ACount + 3 * m_WeightsCount + 3 * m_BiasesCount + 2 * m_ZCount];
+
+	
+
+
+
 
 
 
@@ -159,6 +182,8 @@ namespace TNNT
 
 		delete[] m_NetworkFixedData;
 
+
+		delete[] m_Indices;
 	}
 
 	
@@ -181,6 +206,11 @@ namespace TNNT
 		TrainMasterFunction();
 	}
 
+	unsigned NetworkPrototype::Check(float* input)
+	{
+		return(CheckMasterFunction(input));
+	}
+
 
 
 
@@ -192,46 +222,29 @@ namespace TNNT
 
 	void NetworkPrototype::SetBiasesToTemp()
 	{
-		unsigned index = 0;
-		while (index < m_BiasesCount)
-		{
-			m_Biases[index] = m_BiasesBuffer[index];
-			index++;
-		}
+
+		memcpy(m_Biases, m_BiasesBuffer, sizeof(float) * m_BiasesCount);
 	}
 
 	void NetworkPrototype::SetTempToBiases()
 	{
-		unsigned index = 0;
-		while (index < m_BiasesCount)
-		{
-			m_BiasesBuffer[index] = m_Biases[index];
-			index++;
-		}
+
+		memcpy(m_BiasesBuffer, m_Biases, sizeof(float) * m_BiasesCount);
+
 	}
 
 
 void NetworkPrototype::SetWeightsToTemp()	
 	{	
-		unsigned index = 0;
-		while (index < m_WeightsCount)
-		{	
-			
-			m_Weights[index] = m_WeightsBuffer[index];
-					
-			index++;	
+
+		memcpy(m_Weights, m_WeightsBuffer, sizeof(float) * m_WeightsCount);
 		
-		}	
 	}
 
 	void NetworkPrototype::SetTempToWeights()
 	{
-		unsigned index = 0;
-		while (index < m_WeightsCount)
-		{
-			m_WeightsBuffer[index] = m_Weights[index];
-			index++;
-		}
+
+		memcpy(m_WeightsBuffer, m_Weights, sizeof(float) * m_WeightsCount);
 	}
 
 
@@ -270,12 +283,8 @@ void NetworkPrototype::SetWeightsToTemp()
 	void NetworkPrototype::SetInput(const float* input)
 	{
 
-		unsigned index = 0;
-		while (index < m_InputBufferCount)
-		{
-			m_InputBuffer[index] = input[index];
-			index++;
-		}
+		memcpy(m_InputBuffer, input, sizeof(float) * m_InputBufferCount);
+
 	}
 
 	void NetworkPrototype::SetTarget(const float* target)
@@ -283,15 +292,9 @@ void NetworkPrototype::SetWeightsToTemp()
 
 
 
+		memcpy(m_TargetBuffer, target, sizeof(float) * m_OutputBufferCount);
 
 
-
-		unsigned index = 0;
-		while (index < m_TargetBufferCount)
-		{
-			m_TargetBuffer[index] = target[index];
-			index++;
-		}
 	}
 
 
@@ -394,31 +397,118 @@ void NetworkPrototype::SetWeightsToTemp()
 		m_Functions.BackPropegateCallBackFunctionsBW[reveresLayoutIndex].f(this);
 
 	}
+#if NEW
+	void NetworkPrototype::Regularization()
+	{
+
+		{
+			m_PositionData.Layer = 1;
+			m_PositionData.Z = 0;
+			m_PositionData.A = m_LayerLayout[0].Nodes;
+			m_PositionData.Biases = m_LayerLayout[0].Biases;
+			m_PositionData.Weights = m_LayerLayout[0].Weights;
+		}
+
+		unsigned layoutIndex = 1;
+
+		while (layoutIndex < m_LayerLayoutCount)
+		{
+
+			
+			m_Functions.RegularizationFunctions[layoutIndex - 1].f(this);
 
 
+
+
+			{
+				m_PositionData.Z += m_LayerLayout[m_PositionData.Layer].Nodes;
+
+				m_PositionData.A += m_LayerLayout[m_PositionData.Layer].Nodes;
+
+				m_PositionData.Biases += m_LayerLayout[m_PositionData.Layer].Biases;
+
+				m_PositionData.Weights += m_LayerLayout[m_PositionData.Layer].Weights;
+
+				m_PositionData.Layer++;
+
+			}
+
+
+			layoutIndex++;
+
+		}
+	}
+
+	void NetworkPrototype::Train()
+	{
+		{
+			m_PositionData.Layer = 1;
+			m_PositionData.Z = 0;
+			m_PositionData.A = m_LayerLayout[0].Nodes;
+			m_PositionData.Biases = m_LayerLayout[0].Biases;
+			m_PositionData.Weights = m_LayerLayout[0].Weights;
+		}
+
+		unsigned layoutIndex = 1;
+
+		while (layoutIndex < m_LayerLayoutCount)
+		{
+
+
+			m_Functions.TrainingFunctions[layoutIndex - 1].f(this);
+
+
+
+
+			{
+				m_PositionData.Z += m_LayerLayout[m_PositionData.Layer].Nodes;
+
+				m_PositionData.A += m_LayerLayout[m_PositionData.Layer].Nodes;
+
+				m_PositionData.Biases += m_LayerLayout[m_PositionData.Layer].Biases;
+
+				m_PositionData.Weights += m_LayerLayout[m_PositionData.Layer].Weights;
+
+				m_PositionData.Layer++;
+
+			}
+
+
+			layoutIndex++;
+
+		}
+	}
+
+#endif 
 
 	void NetworkPrototype::TrainOnSet(unsigned batchCount , unsigned batch)
 	{
 
-		m_Functions.RegularizationFunction.f(this);
-
+#if NEW
+		Regularization();
+#endif
+#if OLD
+		m_Functions.RegularizationFunctions.f(this);
+#endif
 	
 
-		unsigned exampleIndex =0;
+		unsigned exampleIndex = 0;
 		while (exampleIndex < batchCount)
 		{
 
-			unsigned indedx = m_Indices[exampleIndex + batch * m_HyperParameters.BatchCount];
-			SetInput(&(m_Data->TrainingInputs[indedx * m_InputBufferCount]));
-			SetTarget(&(m_Data->TraningTargets[indedx * m_TargetBufferCount]));
+			unsigned index = m_Indices[exampleIndex + batch * m_HyperParameters.BatchCount];
+			SetInput(&(m_Data->TrainingInputs[index * m_InputBufferCount]));
+			SetTarget(&(m_Data->TraningTargets[index * m_OutputBufferCount]));
 
 
 			FeedForward();
 			Backpropegate();
-
-			m_Functions.TrainingFunction.f(this);
-
-
+#if NEW
+			Train();
+#endif
+#if OLD
+			m_Functions.TrainingFunctions.f(this);
+#endif
 
 			exampleIndex++;
 
@@ -445,6 +535,7 @@ void NetworkPrototype::SetWeightsToTemp()
 		const unsigned remainingBatch = m_Data->TrainingCount % m_HyperParameters.BatchCount;
 
 		std::mt19937 mt;
+		
 
 		unsigned epochNum = 0;
 		while (epochNum < m_HyperParameters.Epochs)
@@ -466,6 +557,7 @@ void NetworkPrototype::SetWeightsToTemp()
 					unsigned epochRandomIndex = m_Indices[randomIndex];
 					m_Indices[randomIndex] = m_Indices[randomIndexPos];
 					m_Indices[randomIndexPos] = epochRandomIndex;
+
 
 					randomIndexPos++;
 					randomIndexCount--;
@@ -506,6 +598,12 @@ void NetworkPrototype::SetWeightsToTemp()
 			epochNum++;
 		}
 		
+		//TODO Remove this:
+		
+
+
+		
+
 
 		//Timer stop
 		auto stop = std::chrono::high_resolution_clock::now();
@@ -526,8 +624,8 @@ void NetworkPrototype::SetWeightsToTemp()
 		while (checkIndex < m_Data->TestCount)
 		{
 
-			SetInput(&m_Data->TestInputs[checkIndex * m_InputBufferCount]);
-			SetTarget(&m_Data->TestTargets[checkIndex * m_TargetBufferCount]);
+			SetInput( &m_Data->TestInputs[checkIndex * m_InputBufferCount]  );
+			SetTarget(&m_Data->TestTargets[checkIndex * m_OutputBufferCount]);
 			
 			
 			FeedForward();
@@ -545,6 +643,7 @@ void NetworkPrototype::SetWeightsToTemp()
 		m_LastTime[1] = time.count();
 
 
+	
 		return  m_CostBuffer / ((float)m_Data->TestCount);
 
 	}
@@ -553,7 +652,7 @@ void NetworkPrototype::SetWeightsToTemp()
 	{
 		auto start = std::chrono::high_resolution_clock::now();
 
-		const unsigned Ap = m_ACount - m_LayerLayout[m_LayerLayoutCount - 1].Nodes;
+		
 
 		float score = 0.0f;
 
@@ -567,12 +666,12 @@ void NetworkPrototype::SetWeightsToTemp()
 			int championItterator = -1;
 			float champion = 0;
 			unsigned outputIndex = 0;
-			while (outputIndex < m_LayerLayout[m_LayerLayoutCount - 1].Nodes)
+			while (outputIndex < m_OutputBufferCount)
 			{
 				
-				if (m_A[Ap + outputIndex] >= champion)
+				if (m_OutputBuffer[outputIndex] >= champion)
 				{
-					champion = m_A[Ap + outputIndex];
+					champion = m_OutputBuffer[outputIndex];
 					championItterator = outputIndex;
 				}
 
@@ -580,7 +679,7 @@ void NetworkPrototype::SetWeightsToTemp()
 				outputIndex++;
 			}
 
-			if (m_Data->TestTargets[m_TargetBufferCount * checkIndex + championItterator] == 1)
+			if (m_Data->TestTargets[m_OutputBufferCount * checkIndex + championItterator] == 1)
 			{
 				score += 1.0f;
 			}
@@ -595,6 +694,32 @@ void NetworkPrototype::SetWeightsToTemp()
 
 		return rate;
 
+	}
+
+	unsigned NetworkPrototype::CheckMasterFunction(float* input)
+	{
+		SetInput(input);
+		FeedForward();
+
+		int champIndex = -1;
+		float champ = 0;
+
+		unsigned index = 0;
+		while (index < m_OutputBufferCount)
+		{
+			if (m_OutputBuffer[index] > champ)
+			{
+				champ = m_OutputBuffer[index];
+				champIndex = index;
+			}
+			index++;
+		}
+
+		//This is not allowed.
+		assert(champIndex != -1);
+
+
+		return champIndex;
 	}
 
 

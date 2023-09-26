@@ -20,7 +20,8 @@ namespace TNNT
 		void PoolingLayerBackpropegateBW(NetworkPrototype* n);
 	}
 
-	namespace CostFunctions {
+	namespace CostFunctions
+	{
 
 		void CrossEntropy(NetworkPrototype* n);
 		void CrossEntropyDerivative(NetworkPrototype* n);
@@ -29,9 +30,9 @@ namespace TNNT
 
 	namespace TrainingFunctions
 	{
-		void L2Regularization(NetworkPrototype* n);
+		void L2Regularization(NetworkPrototype* n );
 
-		void GradientDecent(NetworkPrototype* n);
+		void GradientDecent(NetworkPrototype* n );
 
 	}
 }
