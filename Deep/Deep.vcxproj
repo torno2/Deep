@@ -140,6 +140,7 @@
     <ClInclude Include="NetworkPrototypeMT.h" />
     <ClInclude Include="NeuralNetworkCustomVariables.h" />
     <ClInclude Include="NeuralNetworkMT.cpp" />
+    <ClInclude Include="TNNTConstantsAndDefines.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="pch.h" />

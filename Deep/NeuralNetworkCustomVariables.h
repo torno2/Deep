@@ -10,6 +10,9 @@ namespace TNNT
 		unsigned Nodes;
 		unsigned Biases;
 		unsigned Weights;
+
+		float LearningRate;
+		float RegularizationConstant;
 		
 	};
 
@@ -33,6 +36,8 @@ namespace TNNT
 
 		//Stochastic Gradient Decent
 		unsigned BatchCount;
+
+
 		float LearningRate;
 		float RegularizationConstant;
 	};
@@ -79,21 +84,11 @@ namespace TNNT
 		NetworkRelayFunction CostFunctionDerivative;
 
 
-
-#if OLD
-		//For the trainingprocess
-		NetworkRelayFunction TrainingFunctions;
-
-		NetworkRelayFunction RegularizationFunctions;
-#endif
-
-#if NEW
 		//For the trainingprocess
 		NetworkRelayFunction* TrainingFunctions;
 
 		NetworkRelayFunction* RegularizationFunctions;
 
-#endif
 
 
 
@@ -107,10 +102,8 @@ namespace TNNT
 			delete[] BackPropegateCallBackFunctionsZ;
 			delete[] BackPropegateCallBackFunctionsBW;
 
-#if NEW
 			delete[] TrainingFunctions;
 			delete[] RegularizationFunctions;
-#endif
 		}
 
 	};

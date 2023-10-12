@@ -23,15 +23,11 @@ namespace TNNT
 
 		m_Functions.CostFunction = functions.CostFunction;
 		m_Functions.CostFunctionDerivative = functions.CostFunctionDerivative;
-#if OLD
-		m_Functions.RegularizationFunctions = functions.RegularizationFunctions;
-		m_Functions.TrainingFunctions = functions.TrainingFunctions;
-#endif
 	
-#if NEW
+
 		m_Functions.RegularizationFunctions = new FunctionsLayout::NetworkRelayFunction[m_LayerLayoutCount - 1];
 		m_Functions.TrainingFunctions = new FunctionsLayout::NetworkRelayFunction[m_LayerLayoutCount - 1];
-#endif
+
 
 
 
@@ -52,11 +48,11 @@ namespace TNNT
 					m_Functions.BackPropegateCallBackFunctionsZ[layoutIndex] = functions.BackPropegateCallBackFunctionsZ[layoutIndex];
 				}
 
-#if NEW
+
 				m_Functions.RegularizationFunctions[layoutIndex] = functions.RegularizationFunctions[layoutIndex];
 
 				m_Functions.TrainingFunctions[layoutIndex] = functions.TrainingFunctions[layoutIndex];
-#endif
+
 
 
 
@@ -397,7 +393,7 @@ void NetworkPrototype::SetWeightsToTemp()
 		m_Functions.BackPropegateCallBackFunctionsBW[reveresLayoutIndex].f(this);
 
 	}
-#if NEW
+
 	void NetworkPrototype::Regularization()
 	{
 
@@ -479,17 +475,17 @@ void NetworkPrototype::SetWeightsToTemp()
 		}
 	}
 
-#endif 
+ 
 
 	void NetworkPrototype::TrainOnSet(unsigned batchCount , unsigned batch)
 	{
 
-#if NEW
+
 		Regularization();
-#endif
-#if OLD
-		m_Functions.RegularizationFunctions.f(this);
-#endif
+
+
+		
+
 	
 
 		unsigned exampleIndex = 0;
@@ -503,12 +499,12 @@ void NetworkPrototype::SetWeightsToTemp()
 
 			FeedForward();
 			Backpropegate();
-#if NEW
+
 			Train();
-#endif
-#if OLD
-			m_Functions.TrainingFunctions.f(this);
-#endif
+
+
+			
+
 
 			exampleIndex++;
 
@@ -591,7 +587,10 @@ void NetworkPrototype::SetWeightsToTemp()
 					batchIndex++;
 
 				}
+				unsigned tempBatchCount = m_HyperParameters.BatchCount;
+				m_HyperParameters.BatchCount = remainingBatch;
 				TrainOnSet(remainingBatch, batch);
+				m_HyperParameters.BatchCount = tempBatchCount;
 			}
 
 

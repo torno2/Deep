@@ -8,7 +8,7 @@
 #include "LayerFunctions.h"
 #include "LayerFunctionsMT.h"
 
-#define clean false
+#define clean true
 #define setup true
 #define threadN 10
 
@@ -18,18 +18,16 @@
 #define train true
 
 
-#define FullyConnected false
+#define FullyConnected true
 #define Convolution !FullyConnected && false 
-#define Test true
+#define Test false
 
 
 #define testPerformance true
 #define testPrototype testPerformance && true
-#define testMultithread testPerformance && false
+#define testMultithread testPerformance && true
 #define testOld testPerformance && true
 #define testOldMT testOld && false
-
-
 
 
 
@@ -282,8 +280,21 @@ int main() {
 			pFuncLayout.CostFunctionDerivative.f = CostFunctions::CrossEntropyDerivative;
 
 
-			pFuncLayout.RegularizationFunctions.f = TrainingFunctions::L2Regularization;
-			pFuncLayout.TrainingFunctions.f = TrainingFunctions::GradientDecent;
+
+			pFuncLayout.RegularizationFunctions = new FunctionsLayout::NetworkRelayFunction[playoutCount - 1];
+			{
+				pFuncLayout.RegularizationFunctions[0].f = TrainingFunctions::L2Regularization;
+				pFuncLayout.RegularizationFunctions[1].f = TrainingFunctions::L2Regularization;
+
+			}
+
+
+			pFuncLayout.TrainingFunctions = new FunctionsLayout::NetworkRelayFunction[playoutCount - 1];
+			{
+				pFuncLayout.TrainingFunctions[0].f = TrainingFunctions::GradientDecent;
+				pFuncLayout.TrainingFunctions[1].f = TrainingFunctions::GradientDecent;
+
+			}
 		}
 		
 	#endif
@@ -359,8 +370,21 @@ int main() {
 			pFuncLayout.CostFunctionDerivative.f = CostFunctions::CrossEntropyDerivative;
 
 
-			pFuncLayout.RegularizationFunction.f = TrainingFunctions::L2Regularization;
-			pFuncLayout.TrainingFunction.f = TrainingFunctions::GradientDecent;
+
+			pFuncLayout.RegularizationFunctions = new FunctionsLayout::NetworkRelayFunction[playoutCount - 1];
+			{
+				pFuncLayout.RegularizationFunctions[0].f = TrainingFunctions::L2Regularization;
+				pFuncLayout.RegularizationFunctions[1].f = TrainingFunctions::L2Regularization;
+
+			}
+
+
+			pFuncLayout.TrainingFunctions = new FunctionsLayout::NetworkRelayFunction[playoutCount - 1];
+			{
+				pFuncLayout.TrainingFunctions[0].f = TrainingFunctions::GradientDecent;
+				pFuncLayout.TrainingFunctions[1].f = TrainingFunctions::GradientDecent;
+
+			}
 		}
 	#endif
 
@@ -440,12 +464,9 @@ int main() {
 			pFuncLayout.CostFunctionDerivative.f = CostFunctions::CrossEntropyDerivative;
 
 
-#if OLD
-			pFuncLayout.RegularizationFunctions.f= TrainingFunctions::L2Regularization;
-			pFuncLayout.TrainingFunctions.f = TrainingFunctions::GradientDecent;
-#endif
 
-#if NEW
+
+
 			pFuncLayout.RegularizationFunctions = new FunctionsLayout::NetworkRelayFunction[playoutCount - 1];
 			{
 				pFuncLayout.RegularizationFunctions[0].f = TrainingFunctions::L2Regularization;
@@ -460,7 +481,7 @@ int main() {
 				pFuncLayout.TrainingFunctions[1].f = TrainingFunctions::GradientDecent;
 
 			}
-#endif
+
 
 		}
 #endif
@@ -569,17 +590,7 @@ int main() {
 		}
 #endif
 
-		unsigned missmatch = 0;
-		for (int i = 0; i < nOld.m_WeightsCount; i++)
-		{
-			
-			if (nOld.m_Weights[i] != nP.m_Weights[i])
-			{
-				missmatch++;
-			}
 
-		}
-		pr("Missmatches: " << missmatch);
 
 
 #if testPerformance
@@ -605,6 +616,9 @@ int main() {
 			pr("Check time: " << t.Stop() << "s");
 
 			//Check Stop
+
+			
+			
 		}
 #endif
 #if testOldMT && testMultithread
@@ -832,35 +846,7 @@ int main() {
 
 	#endif
 
-		unsigned* checkThis = new unsigned[nOld.m_WeightsCount];
 
-		missmatch = 0;
-		for (int i = 0; i < nOld.m_WeightsCount; i++)
-		{
-
-			if (nOld.m_Weights[i] != nP.m_Weights[i])
-			{
-				checkThis[missmatch] = i;
-				missmatch++;
-				
-			}
-
-		}
-		pr("Missmatches: " << missmatch);
-
-		unsigned champ = 0;
-		for (int i = 0; i < missmatch; i++)
-		{
-			if (checkThis[i] > champ + 1)
-			{
-				champ = checkThis[i];
-				pr(checkThis[i]);
-			}
-			else
-			{
-				champ = checkThis[i];
-			}
-		}
 
 	}
 
@@ -869,7 +855,22 @@ int main() {
 
 
 
+	const int arrSize = 10;  // Specify the size of the array
+	unsigned arr[arrSize];  // Declare a C-style array of unsigned integers
 
+
+
+	unsigned counter = 0;
+	// Use std::transform to copy the values from the auxiliary array to the main array
+	std::transform(arr, arr + arrSize, arr, [&counter](unsigned val) -> unsigned {
+		unsigned temp = counter;
+		counter++;
+		return temp;
+		});
+
+	for (int i = 0; i < arrSize; ++i) {
+		std::cout << arr[i] << " ";
+	}
 	std::cin.get();
 }
 

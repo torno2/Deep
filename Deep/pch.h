@@ -15,7 +15,8 @@
 //Used to create random seeds in addition to debugging.
 #include <chrono>
 
-//Data-management
+//Data-manipulation and management
+#include <algorithm>
 #include <vector>
 
 //Multi-threading
@@ -28,6 +29,7 @@
 #include "Math.h"
 #include "Matrix.h"
 #include "Utils.h"
-
+#include "TNNTConstantsAndDefines.h"
 
 #include "Control.h"
+

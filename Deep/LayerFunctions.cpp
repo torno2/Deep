@@ -505,53 +505,6 @@ namespace TNNT
 	}
 
 
-	//Old
-#if OLD
-	namespace TrainingFunctions
-	{
-
-		void L2Regularization(NetworkPrototype* n)
-		{
-
-
-
-			unsigned index = 0;
-			while (index < n->m_WeightsCount)
-			{
-
-				n->m_WeightsBuffer[index] *= (1 - (n->m_HyperParameters.LearningRate * n->m_HyperParameters.RegularizationConstant / ((float)n->m_Data->TrainingCount)));
-
-				index++;
-			}
-		}
-
-		void GradientDecent(NetworkPrototype* n)
-		{
-
-			unsigned i = 0;
-			while (i < n->m_WeightsCount)
-			{
-
-				n->m_WeightsBuffer[i] -= (n->m_HyperParameters.LearningRate / ((float)n->m_HyperParameters.BatchCount)) * n->m_DeltaWeights[i];
-
-				i++;
-			}
-
-			i = 0;
-			while (i < n->m_BiasesCount)
-			{
-
-				n->m_BiasesBuffer[i] -= (n->m_HyperParameters.LearningRate / ((float)n->m_HyperParameters.BatchCount)) * n->m_DeltaBiases[i];
-
-				i++;
-			}
-		}
-	}
-#endif
-
-	//New
-#if NEW
-
 	namespace TrainingFunctions 
 	{
 
@@ -564,6 +517,11 @@ namespace TNNT
 			{
 				
 				n->m_WeightsBuffer[n->m_PositionData.Weights+index] *= (1 - (n->m_HyperParameters.LearningRate * n->m_HyperParameters.RegularizationConstant / ((float)n->m_Data->TrainingCount)));
+				
+				
+
+				
+
 
 				index++;
 			}
@@ -578,17 +536,22 @@ namespace TNNT
 
 				if (index < n->m_LayerLayout[n->m_PositionData.Layer].Biases)
 				{
-					n->m_BiasesBuffer[n->m_PositionData.Biases + index] -= (n->m_HyperParameters.LearningRate / ((float)n->m_HyperParameters.BatchCount)) * n->m_DeltaBiases[index];
+					n->m_BiasesBuffer[n->m_PositionData.Biases + index] -= (n->m_HyperParameters.LearningRate / ((float)n->m_HyperParameters.BatchCount)) * n->m_DeltaBiases[n->m_PositionData.Biases + index];
+					
 				}
 
-				n->m_WeightsBuffer[n->m_PositionData.Weights + index] -= (n->m_HyperParameters.LearningRate / ((float)n->m_HyperParameters.BatchCount)) * n->m_DeltaWeights[index];
+				float tempWeight = n->m_WeightsBuffer[n->m_PositionData.Weights + index];
+				n->m_WeightsBuffer[n->m_PositionData.Weights + index] -= (n->m_HyperParameters.LearningRate / ((float)n->m_HyperParameters.BatchCount)) * n->m_DeltaWeights[n->m_PositionData.Weights+index];
+
+				
+
 
 				index++;
 			}
 
 		}
 	}
-#endif
+
 }
 
 

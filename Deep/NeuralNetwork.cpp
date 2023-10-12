@@ -678,6 +678,10 @@ namespace TNNT
 		while (index < m_WeightsCount)
 		{
 			m_WeightsBuffer[index] *= (1 - (learingRate * L2regConst / (float)trainingSetSize));
+			
+
+
+
 			index++;
 		}
 	}
@@ -696,18 +700,24 @@ namespace TNNT
 
 
 
-		unsigned i = 0;
-		while (i < m_WeightsCount)
+		unsigned index = 0;
+		while (index < m_WeightsCount)
 		{
-			m_WeightsBuffer[i] -= (learingRate / (float)batchSize) * m_DeltaWeights[i];
-			i++;
+	
+			m_WeightsBuffer[index] -= (learingRate / (float)batchSize) * m_DeltaWeights[index];
+			
+
+			index++;
 		}
 
-		i = 0;
-		while (i < m_BiasesCount)
+		index = 0;
+		while (index < m_BiasesCount)
 		{
-			m_BiasesBuffer[i] -= (learingRate / (float)batchSize) * m_DeltaBiases[i];
-			i++;
+			m_BiasesBuffer[index] -= (learingRate / (float)batchSize) * m_DeltaBiases[index];
+			
+
+
+			index++;
 		}
 
 
@@ -718,6 +728,8 @@ namespace TNNT
 	{
 
 		RegWeightsL2(trainingSetSize, learingRate, regConst);
+		
+
 		unsigned exampleIndex = 0;
 		while (exampleIndex < num)
 		{
@@ -731,7 +743,7 @@ namespace TNNT
 
 
 			GradientDecent(num, learingRate);
-
+			
 
 			exampleIndex++;
 		}

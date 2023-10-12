@@ -68,6 +68,9 @@ namespace TNNT
 		//Multi Threading
 		std::thread* m_SlaveThreads;
 		unsigned m_SlaveThreadCount;
+
+		//comming soon
+		unsigned m_CachePaddingFloat = CacheLineSize / sizeof (float);
 		
 
 		//Synching
@@ -126,7 +129,10 @@ namespace TNNT
 
 		void FeedForward(unsigned thread);
 		void Backpropegate(unsigned thread);
-
+		
+		void Regularization(unsigned thread);
+		void Train(unsigned thread);
+		
 		void TrainOnSet(unsigned batchCount, unsigned batch, unsigned thread);
 
 		void TrainSlaveFunction(unsigned thread);

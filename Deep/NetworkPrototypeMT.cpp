@@ -231,20 +231,11 @@ namespace TNNT
 		ThreadWorkloadDivider(localOffset, localStop, m_BiasesCount, thread);
 
 		
-		
+		unsigned dist = localStop - localOffset;
 
-		unsigned index = localOffset;
-		while (index < localStop)
-		{
-			
-			
+		memcpy(&m_BiasesBuffer[localOffset], &m_Biases[localOffset], dist * sizeof(float));
 
-			m_BiasesBuffer[index] =  m_Biases[index];
 
-			
-
-			index++;
-		}
 	}
 
 	void NetworkPrototypeMT::SetTempToWeights(unsigned thread)
@@ -254,18 +245,10 @@ namespace TNNT
 		ThreadWorkloadDivider(localOffset, localStop, m_WeightsCount, thread);
 
 		
+		unsigned dist = localStop - localOffset;
 
-		unsigned index = localOffset;
-		while (index < localStop)
-		{
-			
+		memcpy(&m_WeightsBuffer[localOffset], &m_Weights[localOffset], dist * sizeof(float));
 
-			m_WeightsBuffer[index] = m_Weights[index];
-
-			
-
-			index++;
-		}
 	}
 
 	void NetworkPrototypeMT::SetTempToBiasesAndWeights(unsigned thread)
@@ -281,15 +264,9 @@ namespace TNNT
 		ThreadWorkloadDivider(localOffset, localStop, m_BiasesCount, thread);
 
 		
+		unsigned dist = localStop - localOffset;
 
-		unsigned index = localOffset;
-		while (index < localStop)
-		{
-			
-			m_Biases[index] = m_BiasesBuffer[index];
-			
-			index++;
-		}
+		memcpy(&m_Biases[localOffset], &m_BiasesBuffer[localOffset], dist * sizeof(float));
 	}
 
 	void NetworkPrototypeMT::SetWeightsToTemp(unsigned thread)
@@ -299,15 +276,10 @@ namespace TNNT
 		ThreadWorkloadDivider(localOffset, localStop, m_WeightsCount, thread);
 
 		
+		unsigned dist = localStop - localOffset;
 
-		unsigned index = localOffset;
-		while (index < localStop)
-		{
-			
-			m_Weights[index] = m_WeightsBuffer[index];
-			
-			index++;
-		}
+		memcpy(&m_Weights[localOffset], &m_WeightsBuffer[localOffset], dist * sizeof(float));
+
 	}
 
 	void NetworkPrototypeMT::SetData(DataSet* data)
@@ -578,6 +550,14 @@ namespace TNNT
 		SpinLock(thread);
 	}
 
+	void NetworkPrototypeMT::Regularization(unsigned thread)
+	{
+	}
+
+	void NetworkPrototypeMT::Train(unsigned thread)
+	{
+	}
+
 
 	void NetworkPrototypeMT::TrainOnSet(unsigned batchCount, unsigned batch, unsigned thread)
 	{
@@ -633,6 +613,7 @@ namespace TNNT
 			while (batch < batchTotal)
 			{
 				position++;
+
 				SlaveControlStation(position);
 				TrainOnSet(m_HyperParameters.BatchCount, batch, thread);
 
@@ -642,8 +623,11 @@ namespace TNNT
 
 			if(remainingBatchCount !=0)
 			{
+				m_SlaveFlags[thread] = true;
+
 				position++;
 				SlaveControlStation(position);
+
 				TrainOnSet(remainingBatchCount, batch , thread);
 			}
 
@@ -667,8 +651,8 @@ namespace TNNT
 
 		std::mt19937 mt;
 
-		unsigned epochNum = 0;
-		while (epochNum < m_HyperParameters.Epochs)
+		unsigned epoch = 0;
+		while (epoch < m_HyperParameters.Epochs)
 		{
 			unsigned randomIndexPos = 0;
 			unsigned randomIndexCount = m_Data->TrainingCount;
@@ -719,24 +703,42 @@ namespace TNNT
 
 				}
 
-				m_MasterControlPoint++;
+				
 			}
 
 
-			epochNum++;
-		}
-		unsigned thread = 0;
-		while (thread < m_SlaveThreadCount)
-		{
-			m_SlaveThreads[thread] = std::thread(&NetworkPrototypeMT::TrainSlaveFunction, this, thread);
-			thread++;
-		}
 
-		thread = 0;
-		while (thread < m_SlaveThreadCount)
-		{
-			m_SlaveThreads[thread].join();
-			thread++;
+
+			unsigned tempBatchCountStorage = m_HyperParameters.BatchCount;
+
+			unsigned thread = 0;
+			while (thread < m_SlaveThreadCount)
+			{
+				m_SlaveThreads[thread] = std::thread(&NetworkPrototypeMT::TrainSlaveFunction, this, thread);
+				thread++;
+			}
+
+			if (remainingBatch > 0)
+			{
+				WaitForSlaves();
+				m_HyperParameters.BatchCount = remainingBatch;
+
+				m_MasterControlPoint++;
+			
+			}
+
+			thread = 0;
+			while (thread < m_SlaveThreadCount)
+			{
+				m_SlaveThreads[thread].join();
+				thread++;
+			}
+
+			m_HyperParameters.BatchCount = tempBatchCountStorage;
+
+
+			epoch++;
+
 		}
 
 		//Timer stop

@@ -1,5 +1,7 @@
 #pragma once
 
-#define OLD false
+#define OLD true
 #define NEW !OLD
+
+
 
