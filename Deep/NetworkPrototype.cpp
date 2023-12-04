@@ -151,17 +151,24 @@ namespace TNNT
 				i++;
 			}
 		}
+
+
 		else {
+
 			//Sets all weights and biases to zero
 			unsigned i = 0;
 			while (i < m_WeightsCount)
 			{
 
-				if (i < m_BiasesCount)
-				{
-					m_Biases[i] = 0;
-				}
+				
 				m_Weights[i] = 0;
+				i++;
+			}
+
+			i = 0;
+			while (i < m_BiasesCount)
+			{
+				m_Biases[i] = 0;
 				i++;
 			}
 		}

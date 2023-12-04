@@ -71,6 +71,7 @@ void PrintImg(float* img, unsigned width, unsigned height)
 
 }
 
+
 void Timer::Start()
 {
 	start = std::chrono::high_resolution_clock::now();
@@ -81,4 +82,50 @@ float Timer::Stop()
 	auto stop = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<float>  time = stop - start;
 	return time.count();
+}
+
+
+
+void ThreadWorkloadDividerUtils(unsigned& start, unsigned& stop, unsigned workCount, unsigned thread, unsigned threadCount)
+{
+	start = 0;
+	stop = 0;
+
+	unsigned workloadCount = (workCount / threadCount);
+	unsigned workloadRemainder = (workCount % threadCount);
+
+
+	if (thread < workloadRemainder)
+	{
+		start = (workloadCount + 1) * thread;
+		stop = start + (workloadCount + 1);
+	}
+	else
+	{
+		start = workloadCount * thread + workloadRemainder;
+
+		stop = start + workloadCount;
+	}
+}
+
+void ThreadWorkloadDividerWithPaddingUtils(unsigned& start, unsigned& stop, unsigned workCount, unsigned thread, unsigned threadCount, unsigned padding)
+{
+	start = 0;
+	stop = 0;
+
+	unsigned workloadCount = (workCount / threadCount);
+	unsigned workloadRemainder = (workCount % threadCount);
+
+
+	if (thread < workloadRemainder)
+	{
+		start = (workloadCount + 1) * thread + padding * thread;
+		stop = start + (workloadCount + 1);
+	}
+	else
+	{
+		start = workloadCount * thread + workloadRemainder + padding * thread;
+
+		stop = start + workloadCount;
+	}
 }

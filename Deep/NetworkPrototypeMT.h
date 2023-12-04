@@ -39,11 +39,11 @@ namespace TNNT
 		float* m_Weights;
 		float* m_Biases;
 
-		float* m_DeltaWeights;
-		float* m_DeltaBiases;
-
 		float* m_WeightsBuffer;
 		float* m_BiasesBuffer;
+
+		float* m_DeltaWeights;
+		float* m_DeltaBiases;
 
 		unsigned m_WeightsCount;
 		unsigned m_BiasesCount;
@@ -70,7 +70,8 @@ namespace TNNT
 		unsigned m_SlaveThreadCount;
 
 		//comming soon
-		unsigned m_CachePaddingFloat = CacheLineSize / sizeof (float);
+		
+		PaddingData m_PaddingData;
 		
 
 		//Synching
@@ -121,9 +122,12 @@ namespace TNNT
 		void SetTarget(float* target, unsigned thread);
 
 		void ThreadWorkloadDivider(unsigned& start, unsigned& stop, unsigned workCount, unsigned thread);
+		void ThreadWorkloadDividerWithPadding(unsigned& start, unsigned& stop, unsigned workCount, unsigned thread);
 		void SpinLock(unsigned thread);
 		void SlaveControlStation(unsigned position);
 		void WaitForSlaves();
+
+		void IterateOverNodes();
 
 		//Actual network mechanisms
 

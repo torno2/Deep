@@ -8,9 +8,9 @@
 #include "LayerFunctions.h"
 #include "LayerFunctionsMT.h"
 
-#define clean true
+#define clean false
 #define setup true
-#define threadN 10
+#define threadN 1
 
 #define TestData false
 #define MNIST true
@@ -24,18 +24,13 @@
 
 
 #define testPerformance true
-#define testPrototype testPerformance && true
+#define testPrototype testPerformance && false
 #define testMultithread testPerformance && true
-#define testOld testPerformance && true
+#define testOld testPerformance && false
 #define testOldMT testOld && false
 
 
-
-
 int main() {
-
-
-
 
 
 #if clean == false
@@ -164,13 +159,13 @@ int main() {
 		unsigned int* layout = new unsigned int[layoutCount];
 		{
 			layout[0] = 28*28;
-			layout[1] = 10;
+			layout[1] = 30;
 			layout[2] = 10;
 		}		
 		unsigned int* layoutMT = new unsigned int[layoutCount];
 		{
 			layoutMT[0] = 784;
-			layoutMT[1] = 10;
+			layoutMT[1] = 30;
 			layoutMT[2] = 10;
 		}
 
@@ -227,7 +222,7 @@ int main() {
 			pLayout[0].Biases = 0;
 			pLayout[0].Weights = 0;
 
-			pLayout[1].Nodes = 10;
+			pLayout[1].Nodes = 30;
 			pLayout[1].Biases = pLayout[1].Nodes;
 			pLayout[1].Weights = pLayout[1].Nodes * pLayout[1-1].Nodes;
 
@@ -564,7 +559,7 @@ int main() {
 			mtFuncLayout.TrainingFunction.f = TrainingFunctionsMT::GradientDecent;
 		}
 
-		NetworkPrototypeMT nMT(MTlayout,mtFuncLayout, MTlayoutCount, threadN);
+		NetworkPrototypeMT nMT(MTlayout,mtFuncLayout, MTlayoutCount, threadN, true);
 		// MT prototype setup stop
 
 #endif
@@ -683,10 +678,13 @@ int main() {
 		pr("Prototype: ");
 		{
 
+			
+
 			//Training start
 			t.Start();
 			nMT.SetData(&data);
 	#if train
+
 			nMT.Train(&data, paramsMT);
 	
 		
@@ -853,24 +851,6 @@ int main() {
 #endif
 
 
-
-
-	const int arrSize = 10;  // Specify the size of the array
-	unsigned arr[arrSize];  // Declare a C-style array of unsigned integers
-
-
-
-	unsigned counter = 0;
-	// Use std::transform to copy the values from the auxiliary array to the main array
-	std::transform(arr, arr + arrSize, arr, [&counter](unsigned val) -> unsigned {
-		unsigned temp = counter;
-		counter++;
-		return temp;
-		});
-
-	for (int i = 0; i < arrSize; ++i) {
-		std::cout << arr[i] << " ";
-	}
 	std::cin.get();
 }
 

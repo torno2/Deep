@@ -1,4 +1,6 @@
 #pragma once
+#include "TNNTConstantsAndDefines.h"
+
 #include "Control.h"
 
 
@@ -24,6 +26,26 @@ namespace TNNT
 		unsigned A			= 0;
 		unsigned Biases		= 0;
 		unsigned Weights	= 0;
+	};
+
+	struct PaddingData
+	{
+		static constexpr unsigned FloatPadding = (CacheLineSize / sizeof(float)) - 1;
+
+		//Total amount of padding elements in the part of an array that is associated with a single layer layer. Will/should be the same for each layer.
+		unsigned FloatPaddingPerLayer;
+
+		//Thread Start and stops (with padding accounted for) for each layers nodes, weights and biases.
+		unsigned* Nodes = nullptr;
+		unsigned* Weights = nullptr;
+		unsigned* Biases = nullptr;
+
+		~PaddingData()
+		{
+			delete[] Nodes;
+			delete[] Weights;
+			delete[] Biases;
+		}
 	};
 
 
@@ -137,9 +159,11 @@ namespace TNNT
 		//Count of this array is m_LayerLayoutCount-1, where the first element applies to the zs of the second layer (no zs in the inputlayer) and the last applies to the zs of the outputlayer.
 		NetworkRelayFunctionMT* FeedForwardCallBackFunctions;
 
-		//The output layert has its derivative (with repect to z) calculated in the CostFunctionDerivative function, so the Count of this array is m_LayerLayoutCount-2. Function for the last layer is supposed to be first in the array.
+		//The output layert has its derivative (with repect to z) calculated in the CostFunctionDerivative function, so the Count of this array is m_LayerLayoutCount-2. 
+		//Function for the last layer is supposed to be first in the array. This is because backpropegation goes from last to first layer, not first to last.
 		NetworkRelayFunctionMT* BackPropegateCallBackFunctionsZ; //Meant for calculating the entries of m_DeltaZ
 		//This one has a count of m_LayerLayoutCount-1
+		//Function for the last layer is supposed to be first in the array. This is because backpropegation goes from last to first layer, not first to last.
 		NetworkRelayFunctionMT* BackPropegateCallBackFunctionsBW; //Meant for calculating the entries of m_DeltaBiases and m_DeltaWeights
 
 
